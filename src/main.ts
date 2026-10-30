@@ -19,6 +19,7 @@ let online = false;
 let hasFrames = false;
 let muted = true;
 let pollPending = false;
+let heartbeatDue = false;
 let lastError = '';
 let recordedSession = '';
 let immersive = false;
@@ -27,6 +28,7 @@ Logger.InitLogging(LogLevel.Warning, false);
 
 async function api(path: string, method = 'POST') {
   const response = await fetch(apiUrl(path), { method, headers: token ? { Authorization: `Bearer ${token}` } : {}, signal: AbortSignal.timeout(8000) });
+  if (!response.headers.get('Content-Type')?.includes('application/json')) throw new Error('世界服务暂时离线，请稍后重试。');
   const result = await response.json();
   if (!response.ok) {
     if ((path === 'session' || path === 'heartbeat') && [401, 409].includes(response.status)) {
@@ -121,7 +123,7 @@ async function connectStream() {
       setPlaying(false);
       void closeFullscreen();
       stage.classList.remove('live');
-      lastError = '画面连接中断，3 分钟内可重新连接本局。';
+      lastError = '画面连接中断，2 分钟内可重新连接本局。';
       render();
     });
     instance.addEventListener('videoInitialized', () => {
@@ -153,19 +155,23 @@ async function connectStream() {
 }
 
 async function poll(heartbeat = false) {
+  // A slow public request must not silently discard the 15-second lease renewal.
+  heartbeatDue ||= heartbeat;
   if (pollPending) return;
   pollPending = true;
+  const renew = heartbeatDue;
+  heartbeatDue = false;
   try {
     const health = await api('health', 'GET');
     online = health.ok;
-    el('seat-state').textContent = !health.ok ? '本机服务暂不可用' : health.busy ? '一位访客正在探索' : '席位空闲 · 可以入场';
+    el('seat-state').textContent = !health.ok ? '世界暂时无法连接' : health.busy ? '一位访客正在探索' : '席位空闲 · 可以入场';
     el('seat-dot').className = `status-dot ${!health.ok ? 'offline' : health.busy ? 'busy' : ''}`;
     if (!current || current.state === 'ended') {
       el('queue-number').textContent = health.busy ? '00' : '01';
       el('queue-detail').textContent = health.busy ? `${health.waiting} 位访客正在等候` : '属于下一位探索者';
     }
     if (token && current?.state !== 'ended') {
-      current = await api(heartbeat ? 'heartbeat' : 'session', heartbeat ? 'POST' : 'GET');
+      current = await api(renew ? 'heartbeat' : 'session', renew ? 'POST' : 'GET');
       if (current!.state === 'ended') disconnect();
     }
     render();
@@ -176,11 +182,14 @@ async function poll(heartbeat = false) {
       lastError = ''; render(); return;
     }
     online = false;
-    el('seat-state').textContent = '暂时无法连接本机服务';
+    el('seat-state').textContent = '世界暂时离线，请稍后重试';
     el('seat-dot').className = 'status-dot offline';
     lastError = error instanceof Error ? error.message : '连接失败，请重试。';
     render();
-  } finally { pollPending = false; }
+  } finally {
+    pollPending = false;
+    if (heartbeatDue) void poll();
+  }
 }
 
 primary.addEventListener('click', async () => {

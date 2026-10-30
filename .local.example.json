@@ -3,5 +3,9 @@
   "game_executable": "C:\\SeeleAI\\seele-dev\\temp\\chasheo-demo\\package\\MysticForest_Windows\\MCPUnrealProject\\Binaries\\Win64\\MCPGameProject.exe",
   "game_cwd": "C:\\SeeleAI\\seele-dev\\temp\\chasheo-demo\\package\\MysticForest_Windows",
   "signal_port": 18791,
-  "streamer_port": 18888
+  "streamer_port": 18888,
+  "allowed_origins": ["https://chasheo.github.io"],
+  "public_origin": "",
+  "ice_config_file": "",
+  "cloudflare_turn_file": ""
 }

@@ -2,6 +2,9 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+import hashlib
+import hmac
+import secrets
 import sqlite3
 import time
 import uuid
@@ -9,6 +12,38 @@ import uuid
 
 class RateLimited(ValueError):
     pass
+
+
+class VisitorIdentity:
+    """An anonymous capability that works when third-party cookies are blocked."""
+
+    def __init__(self, key_path: Path):
+        key_path = Path(key_path)
+        key_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with key_path.open('xb') as key_file:
+                key_file.write(secrets.token_bytes(32))
+        except FileExistsError:
+            pass
+        self.key = key_path.read_bytes()
+        if len(self.key) != 32:
+            raise ValueError('Visitor identity signing key is invalid.')
+
+    def issue(self, visitor_id=None):
+        visitor_id = visitor_id or secrets.token_hex(24)
+        payload = 'v1.' + visitor_id
+        signature = hmac.new(self.key, payload.encode(), hashlib.sha256).hexdigest()
+        return payload + '.' + signature
+
+    def verify(self, token):
+        if not isinstance(token, str) or len(token) != 116:
+            return None
+        version, visitor_id, signature = token.split('.') if token.count('.') == 2 else ('', '', '')
+        if (version != 'v1' or len(visitor_id) != 48 or len(signature) != 64
+                or any(c not in '0123456789abcdef' for c in visitor_id + signature)):
+            return None
+        expected = self.issue(visitor_id).rsplit('.', 1)[1]
+        return visitor_id if hmac.compare_digest(signature, expected) else None
 
 
 class Community:

@@ -8,12 +8,35 @@ let cursor: number | null = null;
 let stats: Stats | null = null;
 let submitting = false;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let visitorToken = localStorage.getItem('chasheo-visitor-token') || '';
+let identifying: Promise<string> | null = null;
 
-async function request(path: string, method = 'GET', body?: object) {
-  const response = await fetch(apiUrl(path), { method, credentials: 'include',
-    headers: body ? { 'Content-Type': 'application/json' } : {},
+async function identify() {
+  if (visitorToken) return visitorToken;
+  if (!identifying) identifying = (async () => {
+    const response = await fetch(apiUrl('visitor'), { method: 'POST', credentials: 'same-origin',
+      signal: AbortSignal.timeout(8000) });
+    if (!response.headers.get('Content-Type')?.includes('application/json')) throw new Error('留言服务暂时离线，请稍后重试。');
+    const result = await response.json();
+    if (!response.ok || !result.visitor_token) throw new Error('暂时无法建立访客身份，请稍后重试。');
+    visitorToken = result.visitor_token;
+    localStorage.setItem('chasheo-visitor-token', visitorToken);
+    return visitorToken;
+  })().finally(() => { identifying = null; });
+  return identifying;
+}
+
+async function request(path: string, method = 'GET', body?: object, retry = true): Promise<any> {
+  const identity = await identify();
+  const response = await fetch(apiUrl(path), { method, credentials: 'same-origin',
+    headers: { 'X-Visitor-Token': identity, ...(body ? { 'Content-Type': 'application/json' } : {}) },
     body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(8000) });
+  if (!response.headers.get('Content-Type')?.includes('application/json')) throw new Error('留言服务暂时离线，请稍后重试。');
   const result = await response.json();
+  if (response.status === 401 && retry) {
+    visitorToken = ''; localStorage.removeItem('chasheo-visitor-token');
+    return request(path, method, body, false);
+  }
   if (!response.ok) throw new Error(result.error || '暂时无法连接世界记录，请稍后重试。');
   return result;
 }

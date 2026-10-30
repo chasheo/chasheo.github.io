@@ -26,12 +26,13 @@ class Session:
 
 class Sessions:
     def __init__(self, launch: Callable, ready: Callable, *, clock=time.monotonic,
-                 heartbeat_timeout=180, queue_timeout=90, offer_timeout=30,
-                 startup_timeout=120):
+                 heartbeat_timeout=120, queue_timeout=90, offer_timeout=30,
+                 startup_timeout=120, prepare=None):
         self.launch, self.ready, self.clock = launch, ready, clock
         self.heartbeat_timeout = heartbeat_timeout
         self.queue_timeout, self.offer_timeout = queue_timeout, offer_timeout
         self.startup_timeout = startup_timeout
+        self.prepare = prepare
         self.lock = asyncio.Lock()
         self.sessions: dict[str, Session] = {}
         self.queue: list[Session] = []
@@ -105,6 +106,8 @@ class Sessions:
 
     async def start_game(self, s):
         try:
+            if self.prepare:
+                await self.prepare(s.id)
             async with self.lock:
                 if self.active is not s:
                     return
@@ -188,7 +191,7 @@ class Sessions:
 
     async def expire_active(self):
         if self.active and self.clock() - self.active.last_seen >= self.heartbeat_timeout:
-            await self.finish(self.active, '连接已失去心跳 180 秒，席位已释放。')
+            await self.finish(self.active, '连接已失去心跳 2 分钟，席位已释放。')
 
     async def ticket(self, token):
         async with self.lock:

@@ -63,13 +63,13 @@ def test_fifo_and_concurrent_claims_only_launch_one_game():
     asyncio.run(check())
 
 
-def test_exact_180_second_expiry_and_stale_heartbeat_cannot_touch_next_player():
+def test_exact_120_second_expiry_and_stale_heartbeat_cannot_touch_next_player():
     async def check():
         m, clock, procs = fixture()
         a, _ = await m.join()
         b, _ = await m.join()
         await start(m, a)
-        clock.now += 179.999
+        clock.now += 119.999
         await m.status(b, heartbeat=True)
         await m.tick()
         assert m.active.token == a and not procs[0].stopped
@@ -94,7 +94,7 @@ def test_queue_heartbeat_does_not_renew_current_player():
         a, _ = await m.join()
         b, _ = await m.join()
         await start(m, a)
-        for _ in range(12):
+        for _ in range(8):
             clock.now += 15
             await m.status(b, heartbeat=True)
             await m.tick()
@@ -103,6 +103,72 @@ def test_queue_heartbeat_does_not_renew_current_player():
         assert (await m.status(b))['state'] == 'offered'
         await m.shutdown()
     asyncio.run(check())
+
+
+def test_async_media_preparation_cannot_launch_an_abandoned_seat():
+    async def check():
+        m, _, procs = fixture()
+        gate = asyncio.Event()
+        async def prepare(_):
+            await gate.wait()
+        m.prepare = prepare
+        a, _ = await m.join()
+        b, _ = await m.join()
+        await m.claim(a)
+        await asyncio.sleep(0)
+        await m.leave(a)
+        await m.claim(b)
+        gate.set()
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        assert m.active.token == b and len(procs) == 1
+        assert (await m.status(a))['state'] == 'ended'
+        await m.shutdown()
+    asyncio.run(check())
+
+
+def test_media_preparation_failure_releases_seat_without_starting_a_game():
+    async def check():
+        m, _, procs = fixture()
+        async def prepare(_):
+            raise RuntimeError('Media relay unavailable')
+        m.prepare = prepare
+        a, _ = await m.join()
+        b, _ = await m.join()
+        await m.claim(a)
+        await asyncio.sleep(0)
+        assert (await m.status(a))['state'] == 'ended'
+        assert (await m.status(b))['state'] == 'offered'
+        assert not procs and m.active is None
+        await m.shutdown()
+    asyncio.run(check())
+
+
+def test_turn_permanent_key_never_enters_public_ice_configuration(tmp_path):
+    import json
+    from server.ice import IceConfiguration
+
+    secret = tmp_path / 'turn.private.json'
+    secret.write_text(json.dumps({'turn_key_id': 'a' * 32, 'api_token': 'private-test-value'}))
+    ice = IceConfiguration({'cloudflare_turn_file': str(secret)}, tmp_path / 'runtime')
+    class Reply:
+        status = 201
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *_):
+            pass
+        async def json(self):
+            return {'iceServers': [{'urls': ['turn:turn.cloudflare.com:3478'],
+                                    'username': 'short-lived-user', 'credential': 'short-lived-password'}]}
+    class Http:
+        def post(self, endpoint, **kwargs):
+            assert endpoint.startswith('https://rtc.live.cloudflare.com/')
+            assert kwargs['headers']['Authorization'] == 'Bearer private-test-value'
+            return Reply()
+    asyncio.run(ice.prepare(Http()))
+    content = ice.path.read_text()
+    assert 'private-test-value' not in content and 'a' * 32 not in content
+    assert json.loads(content)['iceServers'][0]['credential'] == 'short-lived-password'
 
 
 def test_stream_tickets_are_one_use_and_invalid_after_handoff():

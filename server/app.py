@@ -5,7 +5,6 @@ import asyncio
 import json
 import logging
 import os
-import secrets
 from pathlib import Path
 import shutil
 
@@ -14,7 +13,8 @@ from aiohttp import web
 
 from .process import HostLock, WindowsJobProcess, current_process_receipt
 from .sessions import Sessions
-from .community import Community, RateLimited
+from .community import Community, RateLimited, VisitorIdentity
+from .ice import IceConfiguration
 
 ROOT = Path(__file__).resolve().parents[1]
 LOG = logging.getLogger('demo.host')
@@ -32,22 +32,40 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
     # Community records are durable user data, independent from disposable demo logs/packages.
     data_dir = Path(config.get('data_dir') or Path(os.environ.get('LOCALAPPDATA', str(Path.home()))) / 'chasheo-worlds')
     community = Community(data_dir / 'community.sqlite3')
+    identities = VisitorIdentity(data_dir / 'visitor-signing.key')
+    ice = IceConfiguration(config, runtime)
 
     @web.middleware
     async def errors(request, handler):
-        # Reject browser cross-origin mutations. Separate hosting can use an exact allow-list.
+        # Pages and the gateway have separate origins. Never use a wildcard for capabilities.
         origin = request.headers.get('Origin')
         allowed = {f'{request.scheme}://{request.host}', *config.get('allowed_origins', [])}
+        if config.get('public_origin'):
+            allowed.add(config['public_origin'])
         if origin and origin not in allowed:
             return web.json_response({'error': '此来源未被允许访问本机游戏。'}, status=403)
         try:
-            response = await handler(request)
+            if request.method == 'OPTIONS':
+                requested_headers = {h.strip().lower() for h in request.headers.get('Access-Control-Request-Headers', '').split(',') if h.strip()}
+                if (not origin or not request.path.startswith('/api/')
+                        or request.headers.get('Access-Control-Request-Method') not in {'GET', 'POST', 'DELETE'}
+                        or requested_headers - {'authorization', 'content-type', 'x-visitor-token'}):
+                    raise web.HTTPForbidden(reason='Preflight request is not allowed.')
+                response = web.Response(status=204, headers={
+                    'Access-Control-Allow-Methods': 'GET, POST, DELETE',
+                    'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Visitor-Token',
+                    'Access-Control-Max-Age': '600'})
+            else:
+                response = await handler(request)
         except RateLimited as error:
             response = web.json_response({'error': str(error)}, status=429)
         except ValueError as error:
             response = web.json_response({'error': str(error)}, status=409)
-        except web.HTTPException:
-            raise
+        except web.HTTPException as error:
+            response = web.json_response({'error': error.reason}, status=error.status)
+        if origin:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Vary'] = 'Origin'
         response.headers['Cache-Control'] = 'no-store' if request.path.startswith('/api/') else 'no-cache'
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -76,15 +94,27 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
         except (aiohttp.ClientError, asyncio.TimeoutError, ValueError):
             return False
 
-    manager = Sessions(launch, ready)
+    async def prepare(_):
+        await ice.prepare(http)
+
+    manager = Sessions(launch, ready, prepare=prepare)
     app['sessions'] = manager
     app['community'] = community
 
-    def visitor(request):
-        value = request.cookies.get('chasheo_visitor', '')
-        return value if len(value) == 48 and all(c in '0123456789abcdef' for c in value) else secrets.token_hex(24)
+    def visitor(request, required=True):
+        header = request.headers.get('X-Visitor-Token', '')
+        cookie = request.cookies.get('chasheo_visitor', '')
+        who = identities.verify(header or cookie)
+        # Preserve existing local authorship when upgrading the old HttpOnly cookie.
+        if not header and len(cookie) == 48 and all(c in '0123456789abcdef' for c in cookie):
+            who = cookie
+        if not who and required:
+            raise web.HTTPUnauthorized(reason='请刷新页面后重试，访客凭证已失效。')
+        return who or ''
 
-    def with_visitor(request, response, value):
+    async def identify(request):
+        value = identities.issue(visitor(request, required=False) or None)
+        response = web.json_response({'visitor_token': value})
         response.set_cookie('chasheo_visitor', value, max_age=31536000,
                             httponly=True, samesite='Lax', secure=request.secure)
         return response
@@ -97,11 +127,10 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
         body = await request.json()
         if not isinstance(body, dict):
             raise ValueError('访问记录格式不正确。')
-        return with_visitor(request, web.json_response(community.visit(body.get('event_id'), who)), who)
+        return web.json_response(community.visit(body.get('event_id'), who))
 
     async def comments(request):
-        who = visitor(request)
-        return with_visitor(request, web.json_response(community.comments(who, request.query.get('before'))), who)
+        return web.json_response(community.comments(visitor(request, required=False), request.query.get('before')))
 
     async def post_comment(request):
         who = visitor(request)
@@ -109,7 +138,7 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
         if not isinstance(body, dict):
             raise ValueError('留言格式不正确。')
         comment = community.post(who, body.get('name', ''), body.get('body', ''), body.get('website', ''))
-        return with_visitor(request, web.json_response({'comment': comment, 'stats': community.stats()}, status=201), who)
+        return web.json_response({'comment': comment, 'stats': community.stats()}, status=201)
 
     async def delete_comment(request):
         return web.json_response(community.delete(int(request.match_info['id']), visitor(request)))
@@ -132,8 +161,9 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
         return web.json_response({'ok': not bool(manager.cleanup_error),
                                   'busy': manager.active is not None,
                                   'waiting': len(manager.queue),
-                                  'capacity': 1, 'heartbeat_timeout': 180,
-                                  'title': 'Mystic Forest', 'mode': 'local'})
+                                  'capacity': 1, 'heartbeat_timeout': manager.heartbeat_timeout,
+                                  'media_relay_configured': bool(config.get('cloudflare_turn_file') or config.get('ice_config_file')),
+                                  'title': 'Mystic Forest', 'mode': 'public' if config.get('public_origin') else 'local'})
 
     async def join(request):
         old = request.headers.get('Authorization', '').removeprefix('Bearer ')
@@ -200,9 +230,13 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
     async def index(request):
         return web.FileResponse(ROOT / 'dist' / 'index.html')
 
+    async def preflight(request):
+        return web.Response(status=204)
+
     async def lifecycle(app):
         nonlocal http
         host_lock = HostLock(runtime / 'host.lock')
+        ice.initialize()
         (runtime / 'service.json').write_text(json.dumps(current_process_receipt()), encoding='utf-8')
         signal = None
         tick_task = None
@@ -211,9 +245,10 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
             node = shutil.which('node')
             if not node:
                 raise RuntimeError('Node.js is required for Pixel Streaming signalling.')
-            # Child inherits just these non-secret port settings.
-            old = {k: os.environ.get(k) for k in ('DEMO_SIGNAL_PORT', 'DEMO_STREAMER_PORT')}
+            # Pass a private file path, never permanent keys or credentials in arguments.
+            old = {k: os.environ.get(k) for k in ('DEMO_SIGNAL_PORT', 'DEMO_STREAMER_PORT', 'DEMO_ICE_CONFIG')}
             os.environ['DEMO_SIGNAL_PORT'], os.environ['DEMO_STREAMER_PORT'] = str(signal_port), str(streamer_port)
+            os.environ['DEMO_ICE_CONFIG'] = str(ice.path)
             try:
                 signal = process_factory([node, str(ROOT / 'server' / 'signalling.cjs')], str(ROOT))
             finally:
@@ -248,7 +283,7 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
                     await asyncio.sleep(0.5)
 
             tick_task = asyncio.create_task(watchdog())
-            LOG.info('Host ready: one game seat, heartbeat timeout=180 seconds')
+            LOG.info('Host ready: one game seat, heartbeat timeout=%s seconds', manager.heartbeat_timeout)
             yield
         finally:
             if tick_task:
@@ -262,6 +297,7 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
 
     app.cleanup_ctx.append(lifecycle)
     app.add_routes([web.get('/api/health', health), web.post('/api/join', join),
+                    web.post('/api/visitor', identify),
                     web.get('/api/stats', statistics), web.post('/api/visit', visit),
                     web.get('/api/comments', comments), web.post('/api/comments', post_comment),
                     web.delete('/api/comments/{id:\\d+}', delete_comment),
@@ -269,7 +305,7 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
                     web.get('/api/session', status), web.post('/api/heartbeat', heartbeat),
                     web.post('/api/claim', claim), web.post('/api/leave', leave),
                     web.post('/api/stream-ticket', ticket), web.get('/stream', stream),
-                    web.get('/', index)])
+                    web.get('/', index), web.options('/{path:.*}', preflight)])
     app.router.add_static('/assets', ROOT / 'dist' / 'assets', show_index=False)
     app.router.add_static('/media', ROOT / 'dist' / 'media', show_index=False)
     return app
