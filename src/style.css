@@ -34,3 +34,39 @@ body.has-3d .hero-shade{background:linear-gradient(90deg,#080f11e8 0%,#0b1112b8 
 @media(max-width:760px){.library{padding:18px}.library-heading{align-items:start;flex-direction:column}.library-heading>p{text-align:left}.game-card{grid-template-columns:1fr}.game-card-visual{min-height:170px}.game-card-content{padding:18px}.game-card h4{font-size:22px}}
 /* Keep essential copy legible independently of decorative micro labels. */
 .admission-copy{font-size:12px}.session-message{font-size:12px}.seat-state{font-size:11px}.admission-footer p{font-size:11px}.queue-number>div>span{font-size:11px}.player-actions button{font-size:11px}.comment-content p{font-size:13px}.name-field{font-size:12px}.form-feedback{font-size:11px}.comment-list-head h3{font-size:13px}.stat>span:last-child{font-size:12px}
+
+/* World interface: legible game UI over a visible, real-time 3D scene. */
+:root{--ink:#070b14;--paper:#edf5ff;--muted:#aabdd0;--acid:#9de9ff;--gold:#c7b9ff;--line:#25384d;color:var(--paper);background:var(--ink)}
+body{background:transparent}
+.hero-art{background:radial-gradient(ellipse at 73% 44%,#16385a 0%,#0a1728 35%,#060a13 75%)}
+.hero-image,.fog,#fireflies{display:none}
+.hero-shade,body.has-3d .hero-shade{background:linear-gradient(90deg,#070b14ee 0%,#070b14d6 26%,#070b1460 48%,#070b1400 75%),linear-gradient(0deg,#070b14ad,transparent 25%,#070b1438)}
+body.has-3d .hero-art{background:transparent}
+.hero-grid{opacity:.08}.hero-copy{max-width:730px}.title-line .outlined{-webkit-text-stroke:1px #c8e9ff}.title-period,.hero-bracket{color:var(--acid)}
+.hero .eyebrow,.hero-description p,.hero-description p>span{color:#d8e7f2}
+.hero-description p{font-size:16px}.hero-description p>span{font-size:14px}
+.portal-coordinate{display:none}.hero-caption{color:#d4e6f6;bottom:92px}.hero-caption>span:last-child{opacity:1;color:#a9c2d7}
+.button-orbit{background:var(--acid);color:#07121e}.enter-world{border-color:#7acdec88}.enter-world:hover{background:var(--acid);color:#07121e}
+.masthead{border-color:#b6dbf02b}.masthead nav a{font-size:14px}.github-link{font-size:12px}.wordmark,.footer-brand{color:#edf5ff}
+.tiny-label,.eyebrow,.stage-label,.stats-intro .tiny-label,.stat>.tiny-label,.section-heading .eyebrow,.guestbook .eyebrow,.stage-title .tiny-label,.admission-top .tiny-label,.queue-number>.tiny-label,.admission-footer .tiny-label,.library-heading .tiny-label{font-size:11px;line-height:1.6;color:#a8c0d5;letter-spacing:1px}
+.hero .eyebrow,.hero-caption,.hero-caption>span:last-child,.scroll-cue,.hero-meta,.hero-meta b,.stage-bottom,.stats-note,.signature-note,.signature>.tiny-label,.back-to-top{font-size:11px;line-height:1.6}
+.hero-meta,.hero-meta b,.scroll-cue,.hero-caption,.stats-note{color:#b5c9d9}.hero-intro .subtle-link,.enter-world>span:nth-child(2){font-size:14px}.enter-world small{font-size:10px}
+.stats-intro p,.guestbook-intro>p:not(.eyebrow),.section-copy,.library-heading>p,.game-card-content>p,.admission-copy,.seat-state,.queue-number>div>span,.session-message,.admission-footer p,.play-footnote,.play-footnote p,.guestbook-intro>p>span,.comment-content p,.name-field,.form-feedback,.comment-list-head h3,.comment-form textarea,.footer{font-size:14px;line-height:1.7;color:#bed0df}
+.stat>span:last-child,.game-card-actions button,.game-download,.library-feedback,.player-actions button,.session-actions button,.comment-form-bottom button,.comment-list-head button,.more-comments,.comment-delete{font-size:13px}
+.stat small,.guestbook-counter small,.comment-meta time,.name-field small,.game-card-badge,.game-card-caption,.poster-disclosure,.controls-hint,.controls-hint>.tiny-label,.play-footnote a,.footer p,.back-to-top{font-size:11px;line-height:1.6;color:#a9bfd1;opacity:1}
+.world-ticker{background:#0a111e;border-color:var(--line)}.world-ticker>div{color:#a9c6e34f}.world-ticker i{color:#79ddff91}
+.library{background:#0b1422ee;border-color:#34516a}.library-heading h3 span,.heading-star{color:var(--acid)}
+.game-card{background:#101e2e;border-color:#304a63}.game-card:hover{background:#142638;border-color:#80d4f0}.game-card.selected{border-color:#83d9f2}
+.game-card-actions button{border-color:#597a91;color:#d9efff;min-height:42px}.game-card-actions button:hover:not(:disabled){background:var(--acid);color:#06121e}.game-download{color:#a9ddef}.game-download:not(a){color:#91aabd}
+.experience{border-color:#30475c;background:#0b1421}.admission{border-color:#30475c;background:linear-gradient(155deg,#142437,#0b1522)}.admission h3>span,.queue-number strong{color:var(--acid)}
+.primary{background:var(--acid);border-color:var(--acid);color:#06121e;font-size:15px;font-weight:600}.primary:hover:not(:disabled){background:#cdf4ff}
+.player-toolbar,.comment-form{background:#0e1927;border-color:#30475c}.player-actions button,.session-actions button{color:#b4d9eb}.comment-form textarea{color:#edf5ff}.comment-form textarea::placeholder,.name-field input::placeholder{color:#a1b5c6}
+.comment-avatar{background:#14283c;border-color:#436b86;color:#bcefff}.comment-meta strong{font-size:14px;color:#e1edf6}.comment-content p{color:#c5d4df}.footer{color:#b5c8d7}.footer p>span{color:#9bb4c6}
+@media(max-width:760px){.masthead nav a{font-size:13px}.github-link{font-size:11px}.hero-copy{padding-top:160px}.hero-caption{max-width:65%;bottom:36px}.hero-description p{font-size:15px}.hero-description p>span{font-size:13px}.hero-intro .subtle-link,.enter-world>span:nth-child(2){font-size:14px}.section-copy,.library-heading>p,.game-card-content>p,.admission-copy,.seat-state,.session-message,.admission-footer p,.guestbook-intro>p:not(.eyebrow),.comment-content p,.footer p{font-size:14px}.tiny-label,.eyebrow,.stage-label,.hero-caption,.hero-caption>span:last-child,.scroll-cue,.game-card-badge,.game-card-caption{font-size:11px}.stats-band{padding-bottom:52px}.stats-note{bottom:8px}.game-card-actions{gap:10px}.game-card-actions button{font-size:13px;min-height:44px}.footer{gap:18px}}
+.section-heading .section-copy{background:#09121fe8;border-left:1px solid #5f9fbb;padding:12px 16px;color:#d5e5f0}
+body .tiny-label,body .eyebrow,body .stage-label,body .hero-caption,body .hero-caption>span:last-child,body .scroll-cue,body .hero-meta,body .hero-meta b,body .stats-note,body .stage-bottom,body .game-card-badge,body .game-card-caption,body .poster-disclosure,body .controls-hint,body .controls-hint>.tiny-label,body .signature-note,body .back-to-top{font-size:12px}
+body .masthead nav a>span,body .stat small,body .guestbook-counter small,body .comment-meta time,body .name-field small{font-size:11px;opacity:1}
+body .game-card-actions button,body .game-download,body .player-actions button,body .session-actions button,body .comment-form-bottom button,body .comment-list-head button,body .more-comments,body .comment-delete{font-size:14px}
+.section-heading h2>span,.signature em,.guestbook-intro h2 em{color:#a6cce1;font-family:inherit;font-style:normal}
+@media(max-width:760px){.hero-caption{bottom:77px;max-width:78%}.hero-description{background:#070b14d9;padding:6px 10px 6px 0;max-width:max-content}.enter-world{background:#07101edb}.hero .scroll-cue{bottom:28px}}
+@media(min-width:761px) and (max-height:780px){.hero{min-height:680px;height:100svh}.hero-copy{padding-top:140px}.hero h1{font-size:clamp(80px,8.5vw,135px);margin:24px 0 20px}.hero-buttons{margin-top:18px}.hero-caption{bottom:65px}.scroll-cue{bottom:20px}.hero-meta{bottom:20px}}
