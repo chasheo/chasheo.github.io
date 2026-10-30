@@ -1,8 +1,8 @@
 # chasheo / Playable Worlds
 
-公开主页：<https://chasheo.github.io/>。GitHub Pages 部署静态前端；固定 API 入口为 <https://chasheo-home-gateway.2172449563.workers.dev>，通过 Workers VPC 和命名 Cloudflare Tunnel 连接本机 5070。排队、留言、统计与推流信令在本机处理；游戏画面通过 WebRTC 直连或独立 TURN 中继传输。没有购买域名或启用付费方案。本机入口为 <http://127.0.0.1:18790/>。
+公开主页：<https://chasheo.github.io/>。GitHub Pages 部署静态前端；固定 API 入口使用 <https://chasheo-home-relay.pages.dev> 和 <https://chasheo-home-gateway.2172449563.workers.dev>，均通过 Workers VPC 和命名 Cloudflare Tunnel 连接本机 5070。排队、留言、统计与推流信令在本机处理；游戏画面通过 WebRTC 直连或独立 TURN 中继传输。没有购买域名或启用付费方案。本机入口为 <http://127.0.0.1:18790/>。
 
-前端通过 `.github/workflows/pages.yml` 从功能分支 `codex/local-streaming-demo` 构建部署。仓库 Actions 变量 `VITE_API_BASE_URL` 指向 HTTPS 网关；它是公开地址，不得放入令牌或秘密。网关仅允许明确配置的浏览器来源，支持跨域预检；跨站访客身份不依赖第三方 Cookie。源码变更保留功能分支与 PR 审核流程，不自行合并主分支。
+前端通过 `.github/workflows/pages.yml` 从功能分支 `codex/local-streaming-demo` 构建部署。仓库 Actions 变量 `VITE_API_BASE_URL` 和 `VITE_API_FALLBACK_URL` 指向同一后台的两个 HTTPS 入口；它们是公开地址，不得放入令牌或秘密。网页打开时并行检查两个入口，选择首先可用的地址并在本次页面会话中保持，两个都失败时保留第一个地址以供重试。网关仅允许明确配置的浏览器来源，支持跨域预检；跨站访客身份不依赖第三方 Cookie。源码变更保留功能分支与 PR 审核流程，不自行合并主分支。
 
 本机 Unreal 游戏主页 demo。使用 `MysticForest_Windows.zip` 的既有 Windows 游戏包，浏览器通过 Epic 官方 UE 5.5 Pixel Streaming 前端与信令库连接。游戏包无需修改，替换游戏只需调整本机配置。
 
@@ -18,6 +18,29 @@ cd C:\SeeleAI\chasheo.github.io
 ```
 
 主页面领取入场券，再确认进入。另一窗口/独立标签页可以作为第二位访客排队。游戏菜单默认使用自由鼠标；需要持续转动视角时点击「锁定鼠标」，Esc 释放。「开启声音」解除浏览器初始静音；「沉浸游玩」进入全屏。
+
+访客不必注册；浏览器使用本机签名的匿名访客凭证保存点赞和留言归属。先进入公共队列，等待期间可浏览游戏目录、选择游戏；轮到后确认启动选中的游戏。所有游戏共用同一个席位和 120 秒失联回收规则。游戏启动后不能直接切换，需退出并重新排队。
+
+`games` 是可选的本机配置数组；不提供时沿用现有 `game_executable` 和 `game_cwd`，以 Mystic Forest 作为唯一游戏。新增游戏时，在 `.local.json` 添加例如：
+
+```json
+"games": [
+  {
+    "id": "mystic-forest",
+    "title": "Mystic Forest",
+    "description": "在森林里探索。",
+    "executable": "C:\\Games\\MysticForest\\Game.exe",
+    "cwd": "C:\\Games\\MysticForest",
+    "image": "/media/forest-portal.png",
+    "image_label": "概念视觉",
+    "images": [{"url": "/media/mystic-forest-browser.png", "label": "实机画面 · 浏览器截图"}],
+    "video": "https://example.com/trailer.mp4",
+    "download_url": "https://example.com/game.zip"
+  }
+]
+```
+
+以上地址为格式示例，替换为真实资源；不填视频或下载链接时不虚构素材，下载显示准备中。媒体可使用本仓库 `/media/` 路径或 HTTPS 地址，下载链接须为 HTTPS。游戏可执行路径只存服务端，不下发给网页；每个游戏需要兼容现有 Pixel Streaming 5.5 启动参数和单 streamer 信令。改配置后等队列空闲再重启后台。点赞按游戏与匿名访客分别记录，清除浏览器数据可能丢失原点赞身份。
 
 ### 登录自启与恢复
 
@@ -109,7 +132,9 @@ npx wrangler@4.156.0 deploy --dry-run --config edge/wrangler.local.jsonc
 npx wrangler@4.156.0 deploy --config edge/wrangler.local.jsonc --profile chasheo-home
 ```
 
-2026-10-31 验证：5 项网关检查、22 项后台检查与前端构建通过。经本机现有 HTTP 代理，VPC 入口通过评论/CORS/身份隔离检查和真实 Windows 游戏生命周期测试；启用自动恢复后的复测在失联约 120.78 秒后回收，WSS 连接撤销、排队交接和单实例均通过。本机直接连接超时；用户报告手机蜂窝网络直连不可用、开启 Clash 后 `/api/health` 返回 `ok: true`。用户随后选择使用此免费固定入口，主页后端据此切换到 Worker。地址固定并不保证各访客网络都能直连；代理链路的成功不代表直连或浏览器视频验收。
+2026-10-31 验证：本机直接连接 workers.dev 超时，用户手机蜂窝网络也无法直连、开启 Clash 后健康检查成功。增加免费固定 Pages 中转后，本机关闭代理可以直连，评论/CORS/身份隔离检查与真实游戏生命周期测试通过：失联约 120.47 秒回收，WSS 撤销、排队交接和单实例均通过。用户报告手机关闭 Wi-Fi 和 Clash 访问 pages.dev 仍然超时。两个免费入口并不能保证国内所有网络免代理，且实际视频还受 WebRTC 直连或 TURN 可用性影响。
+
+Pages 项目 `chasheo-home-relay` 的 `edge/pages-relay.mjs` 通过 service binding 调用现有 Worker，沿用同一套 API 白名单，不绕过本机的会话控制。`edge/pages-relay.example.jsonc` 是配置模板；运行产物与个人 Wrangler 凭证放在临时目录。启用此入口需要个人账户的 `pages:write` 权限。两条入口均使用 Cloudflare 免费额度，Workers VPC 当前仍为 Beta。
 
 `tests/verify_live_host.py --base-url <HTTPS地址> --proxy-from-env` 可显式使用已有 `HTTPS_PROXY`/`ALL_PROXY`，只记录使用代理的事实，不记录代理值；默认仍是直连。证据文件在本机运行目录的 `evidence/`，分别标注测试路径。命名 Tunnel 已安装为 Windows 自动启动服务，故障后等待 20 秒重启；Python 游戏宿主通过上文的用户计划任务自启和恢复。临时 Quick Tunnel 不再作为主页默认后端，也不需要手动保持临时隧道窗口。
 

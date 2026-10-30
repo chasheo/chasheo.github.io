@@ -86,6 +86,63 @@ def test_visitor_capability_survives_restart_and_rejects_forgery(tmp_path):
     assert first.verify('f' * 48) is None
 
 
+def test_game_likes_are_idempotent_and_per_visitor_and_game(tmp_path):
+    path = tmp_path / 'community.sqlite3'
+    db = Community(path)
+    assert db.set_game_like('forest', 'alice', True) == {'likes': 1, 'liked': True}
+    assert db.set_game_like('forest', 'alice', True) == {'likes': 1, 'liked': True}
+    assert db.set_game_like('forest', 'bob', True) == {'likes': 2, 'liked': True}
+    db.set_game_like('other', 'alice', True)
+    assert Community(path).game_likes('forest', 'alice') == {'likes': 2, 'liked': True}
+    assert db.set_game_like('forest', 'alice', False) == {'likes': 1, 'liked': False}
+    assert db.game_likes('other', 'alice') == {'likes': 1, 'liked': True}
+    with pytest.raises(ValueError):
+        db.set_game_like('forest', 'alice', 'true')
+
+
+def test_multiple_configured_games_launch_only_the_selected_server_owned_executable(tmp_path, monkeypatch):
+    from aiohttp.test_utils import TestClient, TestServer
+    import server.app as gateway
+
+    (tmp_path / 'dist' / 'assets').mkdir(parents=True)
+    (tmp_path / 'dist' / 'media').mkdir()
+    monkeypatch.setattr(gateway, 'ROOT', tmp_path)
+    first_exe, second_exe = tmp_path / 'one.exe', tmp_path / 'two.exe'
+    first_exe.touch(); second_exe.touch()
+    launches = []
+
+    class Process:
+        pid = 321
+        def __init__(self, args, cwd):
+            launches.append((args, cwd))
+        def poll(self): return None
+        def stop(self): pass
+
+    async def check():
+        app = gateway.create_app({'runtime_dir': str(tmp_path / 'runtime'), 'data_dir': str(tmp_path / 'data'),
+            'games': [{'id': 'one', 'title': 'One', 'executable': str(first_exe)},
+                      {'id': 'two', 'title': 'Two', 'executable': str(second_exe), 'cwd': str(tmp_path)}]},
+            process_factory=Process)
+        app.cleanup_ctx.clear()
+        manager = app['sessions']
+        manager.prepare = None
+        async def ready(_): return True
+        manager.ready = ready
+        async with TestClient(TestServer(app)) as client:
+            first = await (await client.post('/api/join')).json()
+            second = await (await client.post('/api/join')).json()
+            first_headers = {'Authorization': 'Bearer ' + first['token']}
+            second_headers = {'Authorization': 'Bearer ' + second['token']}
+            assert (await client.post('/api/claim', headers=second_headers, json={'game_id': 'one'})).status == 409
+            assert (await client.post('/api/claim', headers=first_headers, json={'game_id': 'two'})).status == 200
+            await asyncio.sleep(0)
+            assert len(launches) == 1 and launches[0][0][0] == str(second_exe.resolve())
+            assert launches[0][1] == str(tmp_path)
+            assert (await client.post('/api/claim', headers=first_headers, json={'game_id': 'one'})).status == 409
+            await manager.shutdown()
+    asyncio.run(check())
+
+
 def test_github_pages_cors_and_comment_ownership_without_cookies(tmp_path, monkeypatch):
     from aiohttp import CookieJar
     from aiohttp.test_utils import TestClient, TestServer
@@ -123,6 +180,23 @@ def test_github_pages_cors_and_comment_ownership_without_cookies(tmp_path, monke
             first = (await response.json())['visitor_token']
             assert not list(client.session.cookie_jar)  # IP host cookies are blocked, like third-party cookies.
             headers = {**origin, 'X-Visitor-Token': first}
+            catalog = await client.get('/api/games', headers=headers)
+            game = (await catalog.json())['games'][0]
+            assert game['id'] == 'mystic-forest' and game['likes'] == 0 and not game['liked']
+            assert 'executable' not in game and 'cwd' not in game
+            liked = await client.post('/api/games/mystic-forest/like', headers=headers, json={'liked': True})
+            assert (await liked.json()) == {'likes': 1, 'liked': True}
+            missing = await client.post('/api/games/nonexistent/like', headers=headers, json={'liked': True})
+            assert missing.status == 404
+            unliked = await client.post('/api/games/mystic-forest/like', headers=headers, json={'liked': False})
+            assert (await unliked.json()) == {'likes': 0, 'liked': False}
+            join = await client.post('/api/join', headers=origin)
+            queue_token = (await join.json())['token']
+            auth = {**origin, 'Authorization': 'Bearer ' + queue_token}
+            rejected = await client.post('/api/claim', headers=auth, json={'game_id': 'nonexistent'})
+            assert rejected.status == 409
+            assert (await (await client.get('/api/session', headers=auth)).json())['state'] == 'offered'
+            await client.post('/api/leave', headers=auth)
             event = str(uuid.uuid4())
             for _ in range(2):
                 response = await client.post('/api/visit', headers=headers, json={'event_id': event})

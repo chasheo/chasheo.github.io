@@ -7,7 +7,22 @@
   "motion": {
     "library": "GSAP 3.15.0 + ScrollTrigger",
     "source": "https://gsap.com/docs/v3/Plugins/ScrollTrigger/",
-    "reference_comparison": ["https://motion.dev/docs/scroll", "https://lenis.dev/"],
+    "reference_comparison": [
+      "https://motion.dev/docs/scroll",
+      "https://lenis.dev/"
+    ],
     "implementation": "Title reveals, scroll parallax, section entrances, counter transitions and small pointer responses. Native scrolling; game input is not intercepted. Reduced-motion support; ambient particles pause during gameplay."
+  },
+  "pine-web.glb": {
+    "source": "https://polyhaven.com/a/pine_sapling_small",
+    "author": "Poly Haven",
+    "license": "CC0 1.0",
+    "purpose": "Real 3D foreground foliage for the cinematic background",
+    "processing": "Downloaded 1k glTF and textures with checksums, decimated meshes to 24% in Blender, exported GLB."
+  },
+  "mystic-forest-browser.png": {
+    "purpose": "An actual browser screenshot of Mystic Forest gameplay within an older version of this homepage.",
+    "source": "Owner-provided MysticForest Windows package, local browser validation",
+    "disclosure": "Actual browser screenshot; not a full-resolution standalone game screenshot."
   }
 }

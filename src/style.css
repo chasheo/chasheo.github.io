@@ -16,5 +16,21 @@ body.immersive-open{overflow:hidden}
 .player-shell.is-immersive .player-toolbar{min-height:64px;padding:15px 30px}
 .player-shell.is-immersive .stage.live .stage-top{opacity:0}
 .toast{z-index:2000}
+.world-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.game-card-caption{position:absolute;right:14px;bottom:14px;z-index:1;color:#e3f3cc;font-size:9px;text-shadow:0 1px 5px #000}
+.game-card-visual img.browser-capture,.game-card:hover .game-card-visual img.browser-capture{transform:scale(1.8);transform-origin:54% 82%}
+body{isolation:isolate}
+body.has-3d .hero-art{background:transparent}
+body.has-3d .hero-image{opacity:.04}
+body.has-3d .hero-shade{background:linear-gradient(90deg,#080f11e8 0%,#0b1112b8 32%,#0b11123d 75%),linear-gradient(0deg,#0b1112b8,transparent 30%,#0b111260)}
+.stage:not(.live) .video-host{background:transparent}
+.library{margin:0 0 34px;border:1px solid #a7c49c38;background:#0c1819e8;padding:28px}
+.library-heading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:22px}
+.library-heading .tiny-label{color:#a6be9c;font-size:9px}.library-heading h3{font-size:clamp(26px,3vw,42px);letter-spacing:-1px;font-weight:400;margin:12px 0 0}.library-heading h3 span{color:var(--acid);margin-left:15px}.library-heading>p{font-size:11px;line-height:1.9;color:#a5b8a8;margin:0;text-align:right}
+.game-library{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+.game-card{display:grid;grid-template-columns:42% 1fr;min-height:200px;background:#142321;border:1px solid #425a48;transition:border-color .25s,transform .3s,background .25s;overflow:hidden}.game-card:hover{transform:translateY(-4px);border-color:#b5d69a;background:#1b2c27}.game-card.selected{border-color:#b7d994}
+.game-card-visual{position:relative;min-height:200px;overflow:hidden}.game-card-visual:after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#06130eba,transparent 55%);pointer-events:none}.game-card-visual img{width:100%;height:100%;position:absolute;object-fit:cover;transition:transform .8s}.game-card:hover .game-card-visual img{transform:scale(1.06)}.game-card-badge{position:absolute;z-index:1;bottom:14px;left:16px;color:#e3f3cc;font:8px var(--mono);letter-spacing:1px}
+.game-card-content{padding:24px;display:flex;flex-direction:column;align-items:start}.game-card h4{font-size:25px;letter-spacing:-.7px;margin:0 0 12px;font-weight:500}.game-card-content>p{color:#a9bcaa;font-size:12px;line-height:1.8;margin:0 0 18px}.game-card-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:auto}.game-card-actions button{border:1px solid #8fa77a;background:transparent;color:#e3f2c9;padding:10px 12px;font-size:11px}.game-card-actions button:hover:not(:disabled){background:var(--acid);color:#142016}.game-like{min-width:55px}.game-download{font-size:11px;color:#c8dda8;padding:10px 0}.game-download:not(a){color:#789183}.library-feedback{font-size:11px;color:#a1b69e;margin:10px 0 0}.library-feedback:empty{display:none}.game-media{display:flex;gap:6px;margin-top:14px}.game-media button{padding:0;width:58px;height:38px;border:1px solid #71946a;background:none;overflow:hidden}.game-media img{width:100%;height:100%;object-fit:cover}.game-preview-video{width:100%;max-height:200px;margin-top:15px;background:#000}
+@media(max-width:760px){.library{padding:18px}.library-heading{align-items:start;flex-direction:column}.library-heading>p{text-align:left}.game-card{grid-template-columns:1fr}.game-card-visual{min-height:170px}.game-card-content{padding:18px}.game-card h4{font-size:22px}}
 /* Keep essential copy legible independently of decorative micro labels. */
 .admission-copy{font-size:12px}.session-message{font-size:12px}.seat-state{font-size:11px}.admission-footer p{font-size:11px}.queue-number>div>span{font-size:11px}.player-actions button{font-size:11px}.comment-content p{font-size:13px}.name-field{font-size:12px}.form-feedback{font-size:11px}.comment-list-head h3{font-size:13px}.stat>span:last-child{font-size:12px}

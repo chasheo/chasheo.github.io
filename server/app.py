@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 from pathlib import Path
 import shutil
 
@@ -23,9 +24,19 @@ LOG = logging.getLogger('demo.host')
 def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Application:
     runtime = Path(config['runtime_dir']).resolve()
     runtime.mkdir(parents=True, exist_ok=True)
-    executable = Path(config['game_executable']).resolve()
-    if not executable.is_file():
-        raise FileNotFoundError(f'Game executable not found: {executable}')
+    entries = config.get('games') or [{'id': 'mystic-forest', 'title': 'Mystic Forest',
+        'description': '在雾气与光之间，探索森林中的未知。', 'image': '/media/forest-portal.png',
+        'image_label': '世界概念视觉', 'images': [{'url': '/media/mystic-forest-browser.png', 'label': '实机画面 · 浏览器截图'}],
+        'executable': config['game_executable'], 'cwd': config.get('game_cwd')}]
+    games = {}
+    for entry in entries:
+        game_id = entry.get('id', '')
+        if not isinstance(game_id, str) or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', game_id) or len(game_id) > 48 or game_id in games:
+            raise ValueError('Game IDs must be unique lowercase slugs.')
+        executable = Path(entry['executable']).resolve()
+        if not executable.is_file():
+            raise FileNotFoundError(f'Game executable not found: {executable}')
+        games[game_id] = {**entry, 'executable': executable}
     signal_port = int(config.get('signal_port', 18791))
     streamer_port = int(config.get('streamer_port', 18888))
     signal_base = f'http://127.0.0.1:{signal_port}'
@@ -74,7 +85,9 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
     app = web.Application(middlewares=[errors], client_max_size=4096)
     http = None
 
-    def launch(session_id):
+    def launch(session_id, game_id):
+        game = games[game_id]
+        executable = game['executable']
         argv = [str(executable), '-RenderOffscreen', '-AudioMixer', '-Unattended',
                 '-Windowed', '-ForceRes', '-ResX=1920', '-ResY=1080',
                 f'-PixelStreamingURL=ws://127.0.0.1:{streamer_port}',
@@ -83,8 +96,8 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
                 '-PixelStreamingEncoderCodec=H264', '-PixelStreamingWebRTCMaxBitrate=15000000',
                 '-PixelStreamingWebRTCStartBitrate=8000000', '-NoScreenMessages',
                 '-log', f'-abslog={runtime / ("game-" + session_id + ".log")}']
-        argv.extend(config.get('game_extra_args', []))
-        return process_factory(argv, str(config.get('game_cwd', executable.parent)))
+        argv.extend(game.get('extra_args', config.get('game_extra_args', [])))
+        return process_factory(argv, str(game.get('cwd') or executable.parent))
 
     async def ready(session_id):
         try:
@@ -121,6 +134,37 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
 
     async def statistics(request):
         return web.json_response(community.stats())
+
+    async def list_games(request):
+        who = visitor(request, required=False)
+        result = []
+        for game_id, game in games.items():
+            entry = {'id': game_id, 'title': str(game.get('title', game_id)),
+                     'description': str(game.get('description', '')),
+                     'image_label': str(game.get('image_label', '游戏视觉'))[:80]}
+            for field in ('image', 'video', 'download_url'):
+                value = game.get(field, '')
+                if isinstance(value, str) and (value.startswith('https://') or (field != 'download_url' and value.startswith('/media/'))):
+                    entry[field] = value
+            images = game.get('images', [])
+            if isinstance(images, list):
+                entry['images'] = []
+                for value in images[:12]:
+                    url = value.get('url', '') if isinstance(value, dict) else value
+                    label = value.get('label', '游戏图片') if isinstance(value, dict) else '游戏图片'
+                    if isinstance(url, str) and (url.startswith('https://') or url.startswith('/media/')):
+                        entry['images'].append({'url': url, 'label': str(label)[:80]})
+            result.append({**entry, **community.game_likes(game_id, who)})
+        return web.json_response({'games': result})
+
+    async def like_game(request):
+        game_id = request.match_info['id']
+        if game_id not in games:
+            raise web.HTTPNotFound(reason='没有找到这个游戏。')
+        body = await request.json()
+        if not isinstance(body, dict):
+            raise ValueError('点赞状态不正确。')
+        return web.json_response(community.set_game_like(game_id, visitor(request), body.get('liked')))
 
     async def visit(request):
         who = visitor(request)
@@ -177,7 +221,13 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
         return web.json_response(await manager.status(token(request)))
 
     async def claim(request):
-        return web.json_response(await manager.claim(token(request)))
+        body = await request.json() if request.can_read_body else {}
+        if not isinstance(body, dict):
+            raise ValueError('请选择一个游戏。')
+        game_id = body.get('game_id', next(iter(games)))
+        if not isinstance(game_id, str) or game_id not in games:
+            raise ValueError('所选游戏不可用，请重新选择。')
+        return web.json_response(await manager.claim(token(request), game_id))
 
     async def leave(request):
         return web.json_response(await manager.leave(token(request)))
@@ -297,6 +347,7 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
 
     app.cleanup_ctx.append(lifecycle)
     app.add_routes([web.get('/api/health', health), web.post('/api/join', join),
+                    web.get('/api/games', list_games), web.post('/api/games/{id:[a-z0-9-]+}/like', like_game),
                     web.post('/api/visitor', identify),
                     web.get('/api/stats', statistics), web.post('/api/visit', visit),
                     web.get('/api/comments', comments), web.post('/api/comments', post_comment),

@@ -15,6 +15,7 @@ class Session:
     token: str
     id: str
     last_seen: float
+    game_id: str = ''
     state: str = 'waiting'
     offer_until: float = 0
     reason: str = ''
@@ -57,7 +58,7 @@ class Sessions:
 
     def snapshot(self, s: Session) -> dict:
         position = self.queue.index(s) + 1 if s in self.queue else 0
-        return {'id': s.id, 'state': s.state, 'position': position,
+        return {'id': s.id, 'state': s.state, 'position': position, 'game_id': s.game_id,
                 'waiting': len(self.queue), 'reason': s.reason,
                 'offer_remaining': max(0, round(s.offer_until - self.clock())),
                 'heartbeat_timeout': self.heartbeat_timeout,
@@ -88,11 +89,13 @@ class Sessions:
                 s.last_seen = self.clock()
             return self.snapshot(s)
 
-    async def claim(self, token):
+    async def claim(self, token, game_id='mystic-forest'):
         async with self.lock:
             await self.expire_active()
             s = self.require(token)
             if self.active is s:
+                if s.game_id != game_id:
+                    raise ValueError('当前游戏已经启动，请先退出再选择其他世界。')
                 return self.snapshot(s)  # double-click / retried request is idempotent
             if self.active or self.cleanup_error or not self.queue or self.queue[0] is not s:
                 raise ValueError('尚未轮到你，请继续等待。')
@@ -100,7 +103,7 @@ class Sessions:
                 raise ValueError('入场确认已过期，请重新排队。')
             self.queue.pop(0)
             self.active = s
-            s.state, s.last_seen = 'starting', self.clock()
+            s.state, s.last_seen, s.game_id = 'starting', self.clock(), game_id
             self.task = asyncio.create_task(self.start_game(s))
             return self.snapshot(s)
 
@@ -113,7 +116,7 @@ class Sessions:
                     return
                 if self.process:
                     raise RuntimeError('Previous game still owns the seat.')
-                self.process = self.launch(s.id)
+                self.process = self.launch(s.id, s.game_id)
                 self.launch_count += 1
                 LOG.info('Game launched session=%s pid=%s', s.id, self.process.pid)
             deadline = self.clock() + self.startup_timeout

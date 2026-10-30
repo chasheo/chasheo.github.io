@@ -32,8 +32,9 @@ async def ready(_):
 def fixture():
     clock, processes = Clock(), []
 
-    def launch(_):
+    def launch(_, game_id):
         process = Process()
+        process.game_id = game_id
         processes.append(process)
         return process
 
@@ -59,6 +60,27 @@ def test_fifo_and_concurrent_claims_only_launch_one_game():
         assert m.active.token == a
         with pytest.raises(ValueError):
             await m.ticket(b)
+        await m.shutdown()
+    asyncio.run(check())
+
+
+def test_queue_claim_binds_selected_game_and_rejects_switch_after_launch():
+    async def check():
+        m, _, processes = fixture()
+        first, _ = await m.join()
+        second, _ = await m.join()
+        await m.claim(first, 'second-game')
+        await asyncio.sleep(0)
+        assert processes[0].game_id == 'second-game'
+        assert (await m.status(first))['game_id'] == 'second-game'
+        with pytest.raises(ValueError):
+            await m.claim(first, 'mystic-forest')
+        with pytest.raises(ValueError):
+            await m.claim(second, 'mystic-forest')
+        await m.leave(first)
+        await m.claim(second, 'mystic-forest')
+        await asyncio.sleep(0)
+        assert processes[0].stopped and processes[1].game_id == 'mystic-forest'
         await m.shutdown()
     asyncio.run(check())
 
@@ -225,7 +247,7 @@ def test_game_crash_releases_seat_and_start_failure_recovers():
         procs[0].stopped = True
         await m.tick()
         assert m.active is None and (await m.status(b))['state'] == 'offered'
-        m.launch = lambda _: (_ for _ in ()).throw(OSError('Missing executable'))
+        m.launch = lambda _session, _game: (_ for _ in ()).throw(OSError('Missing executable'))
         await m.claim(b)
         await asyncio.sleep(0)
         assert m.active is None and (await m.status(b))['state'] == 'ended'

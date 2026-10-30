@@ -1,9 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import gateway from '../edge/gateway.mjs';
+import pagesRelay from '../edge/pages-relay.mjs';
 
 const BASE = 'https://chasheo-home-gateway.personal.workers.dev';
 const ORIGIN = 'https://chasheo.github.io';
+
+test('Pages entry forwards the unchanged request and WebSocket response to the existing gateway', async () => {
+  const request = new Request('https://example.pages.dev/stream?ticket=test', { headers: { Origin: ORIGIN, Upgrade: 'websocket' } });
+  const upgrade = { status: 101, webSocket: { testSocket: true } };
+  assert.equal(await pagesRelay.fetch(request, { GAME_GATEWAY: { fetch(received) {
+    assert.equal(received, request); return upgrade;
+  } } }), upgrade);
+});
 
 test('forwards the session capability, visitor capability, JSON body and request path', async () => {
   const expected = new Response('{"state":"ready"}', { headers: { 'Content-Type': 'application/json' } });
@@ -44,6 +53,18 @@ test('forwards cross-origin preflight intact to the authoritative gateway', asyn
     return new Response(null, { status: 204 });
   } } });
   assert.equal(result.status, 204);
+});
+
+test('allows the game catalog and scoped like route while keeping other game paths private', async () => {
+  let calls = 0;
+  const env = { GAME_HOST: { async fetch() { calls++; return new Response('{}'); } } };
+  for (const [path, method, status] of [
+    ['/api/games', 'GET', 200], ['/api/games/mystic-forest/like', 'POST', 200],
+    ['/api/games/mystic-forest/like', 'GET', 405], ['/api/games/secret/executable', 'GET', 404]
+  ]) {
+    assert.equal((await gateway.fetch(new Request(BASE + path, { method, headers: { Origin: ORIGIN } }), env)).status, status);
+  }
+  assert.equal(calls, 2);
 });
 
 test('rejects unrelated origins, private paths and unlisted API methods without reaching the host', async () => {

@@ -62,6 +62,9 @@ class Community:
                     visitor TEXT NOT NULL, name TEXT NOT NULL, body TEXT NOT NULL,
                     created REAL NOT NULL, deleted INTEGER NOT NULL DEFAULT 0);
                 CREATE INDEX IF NOT EXISTS comments_visitor_time ON comments(visitor, created);
+                CREATE TABLE IF NOT EXISTS game_likes (
+                    game_id TEXT NOT NULL, visitor TEXT NOT NULL, created REAL NOT NULL,
+                    PRIMARY KEY (game_id, visitor));
             ''')
 
     @contextmanager
@@ -94,6 +97,22 @@ class Community:
         with self.connection() as db:
             db.execute('INSERT OR IGNORE INTO plays VALUES (?,?)', (session_id, self.clock()))
         return self.stats()
+
+    def game_likes(self, game_id, visitor):
+        with self.connection() as db:
+            count = db.execute('SELECT count(*) FROM game_likes WHERE game_id=?', (game_id,)).fetchone()[0]
+            liked = bool(visitor and db.execute('SELECT 1 FROM game_likes WHERE game_id=? AND visitor=?', (game_id, visitor)).fetchone())
+        return {'likes': count, 'liked': liked}
+
+    def set_game_like(self, game_id, visitor, liked):
+        if not isinstance(liked, bool):
+            raise ValueError('点赞状态不正确。')
+        with self.connection() as db:
+            if liked:
+                db.execute('INSERT OR IGNORE INTO game_likes VALUES (?,?,?)', (game_id, visitor, self.clock()))
+            else:
+                db.execute('DELETE FROM game_likes WHERE game_id=? AND visitor=?', (game_id, visitor))
+        return self.game_likes(game_id, visitor)
 
     def comments(self, visitor, before=None):
         before = int(before) if before is not None else 2**63 - 1

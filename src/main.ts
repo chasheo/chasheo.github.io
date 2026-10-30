@@ -2,9 +2,10 @@ import { Config, PixelStreaming, Logger, LogLevel } from '@epicgames-ps/lib-pixe
 import './style.css';
 import { initMotion, setPlaying } from './motion';
 import { initCommunity, updateStats } from './community';
-import { HAS_SERVICE, apiUrl, streamUrl } from './service';
+import { HAS_SERVICE, apiUrl, streamUrl, selectService } from './service';
+import { initLibrary, selectedGame, setLibrarySession } from './library';
 
-type SessionState = { id: string; state: string; position: number; waiting: number; reason: string;
+type SessionState = { id: string; state: string; position: number; waiting: number; reason: string; game_id?: string;
   offer_remaining: number; lease_remaining: number | null; heartbeat_timeout: number };
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const primary = el<HTMLButtonElement>('primary');
@@ -26,8 +27,8 @@ let immersive = false;
 class ExpiredSession extends Error {}
 Logger.InitLogging(LogLevel.Warning, false);
 
-async function api(path: string, method = 'POST') {
-  const response = await fetch(apiUrl(path), { method, headers: token ? { Authorization: `Bearer ${token}` } : {}, signal: AbortSignal.timeout(8000) });
+async function api(path: string, method = 'POST', body?: object) {
+  const response = await fetch(apiUrl(path), { method, headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(8000) });
   if (!response.headers.get('Content-Type')?.includes('application/json')) throw new Error('世界服务暂时离线，请稍后重试。');
   const result = await response.json();
   if (!response.ok) {
@@ -55,6 +56,7 @@ function recordPlay() {
 function render() {
   const s = current;
   const active = s?.state === 'starting' || s?.state === 'ready';
+  setLibrarySession(Boolean(active), s?.game_id);
   el('leave').hidden = !s || s.state === 'ended';
   el('reconnect').hidden = s?.state !== 'ready' || hasFrames;
   el<HTMLButtonElement>('fullscreen').disabled = !hasFrames;
@@ -70,12 +72,12 @@ function render() {
     el('number-label').textContent = 'YOUR SEAT IS READY';
     el('queue-number').textContent = '01';
     el('queue-detail').textContent = `请在 ${s.offer_remaining} 秒内确认入场`;
-    el('session-message').textContent = lastError || '轮到你了。确认后，森林将为你启动。';
-    button('确认进入森林');
+    el('session-message').textContent = lastError || '轮到你了。选择世界后确认启动。';
+    button('启动所选游戏');
   } else if (active) {
     el('number-label').textContent = 'YOUR EXPLORATION';
     el('queue-number').textContent = '01';
-    el('queue-detail').textContent = s.state === 'starting' ? '森林正在启动' : '席位由你独享';
+    el('queue-detail').textContent = s.state === 'starting' ? '世界正在启动' : '席位由你独享';
     el('session-message').textContent = lastError || (s.state === 'starting' ? '正在唤醒世界与连接画面，请稍候。' : hasFrames ? '画面已连接。点击画面，开始探索。' : '正在连接实时画面。');
     button(s.state === 'starting' ? '正在启动世界' : hasFrames ? '沉浸游玩' : '正在连接画面', !hasFrames);
   } else {
@@ -83,7 +85,7 @@ function render() {
     el('session-message').textContent = lastError || s?.reason || '准备好开启一小段探索了吗？';
     button(online ? '领取入场券' : '重新连接服务');
   }
-  el('stage-message').textContent = active ? (hasFrames ? '' : s?.state === 'starting' ? '正在唤醒森林，请稍候…' : '正在建立实时连接…') : '世界已准备好，等你入场。';
+  el('stage-message').textContent = active ? (hasFrames ? '' : s?.state === 'starting' ? '正在唤醒世界，请稍候…' : '正在建立实时连接…') : '选择世界，等你入场。';
   el('live-label').textContent = hasFrames ? 'LIVE / YOUR WORLD' : active ? 'ESTABLISHING CONNECTION' : 'WAITING FOR EXPLORER';
 }
 
@@ -198,7 +200,7 @@ primary.addEventListener('click', async () => {
   lastError = '';
   render();
   try {
-    if (current?.state === 'offered') current = await api('claim');
+    if (current?.state === 'offered') current = await api('claim', 'POST', { game_id: selectedGame() });
     else {
       const result = await api('join');
       token = result.token;
@@ -293,6 +295,8 @@ el('sound').addEventListener('click', () => {
   stream?.play();
   el('sound').textContent = muted ? '开启声音' : '关闭声音';
 });
+async function initializeServices() {
+await selectService();
 if (HAS_SERVICE) {
   void poll(true);
   setInterval(() => void poll(), 2000);
@@ -309,5 +313,9 @@ if (HAS_SERVICE) {
   el('stage-message').textContent = '实机体验将在游戏服务接入后开放。';
   button('游戏服务待接入', true);
 }
-initMotion();
+void initLibrary();
 void initCommunity();
+}
+initMotion();
+void import('./world-scene').then(({ initWorldScene }) => initWorldScene()).catch(() => {});
+void initializeServices();

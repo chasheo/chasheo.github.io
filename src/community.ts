@@ -26,7 +26,7 @@ async function identify() {
   return identifying;
 }
 
-async function request(path: string, method = 'GET', body?: object, retry = true): Promise<any> {
+export async function request(path: string, method = 'GET', body?: object, retry = true): Promise<any> {
   const identity = await identify();
   const response = await fetch(apiUrl(path), { method, credentials: 'same-origin',
     headers: { 'X-Visitor-Token': identity, ...(body ? { 'Content-Type': 'application/json' } : {}) },

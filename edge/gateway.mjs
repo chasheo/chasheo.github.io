@@ -3,7 +3,7 @@ const API_METHODS = new Map([
   ['health', ['GET', 'HEAD']], ['join', ['POST']], ['session', ['GET']],
   ['heartbeat', ['POST']], ['claim', ['POST']], ['leave', ['POST']],
   ['stream-ticket', ['POST']], ['visitor', ['POST']], ['stats', ['GET', 'HEAD']],
-  ['visit', ['POST']], ['comments', ['GET', 'POST']], ['play-start', ['POST']]
+  ['visit', ['POST']], ['comments', ['GET', 'POST']], ['play-start', ['POST']], ['games', ['GET', 'HEAD']]
 ]);
 const SITE_ORIGIN = 'https://chasheo.github.io';
 
@@ -25,7 +25,8 @@ export default {
     if (origin && !allowedOrigin) return reply(request, 403, '此来源未被允许访问游戏。', false);
 
     const endpoint = url.pathname.startsWith('/api/') ? url.pathname.slice(5) : '';
-    const methods = /^comments\/[1-9]\d*$/.test(endpoint) ? ['DELETE'] : API_METHODS.get(endpoint);
+    const methods = /^comments\/[1-9]\d*$/.test(endpoint) ? ['DELETE']
+      : /^games\/[a-z0-9]+(?:-[a-z0-9]+)*\/like$/.test(endpoint) ? ['POST'] : API_METHODS.get(endpoint);
     const isStream = url.pathname === '/stream';
     if (!methods && !isStream) return reply(request, 404, '此入口仅提供游戏连接与社区服务。', allowedOrigin);
     const validMethod = isStream ? request.method === 'GET'
