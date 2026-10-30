@@ -1,6 +1,6 @@
 # chasheo / Playable Worlds
 
-公开主页：<https://chasheo.github.io/>。GitHub Pages 部署静态前端；排队、留言、统计与推流信令由本机网关经 Cloudflare Tunnel 提供 HTTPS/WSS。游戏画面通过 WebRTC 直连或独立 TURN 中继传输。未设置公网服务时，页面明确显示尚未接入，不伪造数据。本机入口为 <http://127.0.0.1:18790/>。
+公开主页：<https://chasheo.github.io/>。GitHub Pages 部署静态前端；固定 API 入口为 <https://chasheo-home-gateway.2172449563.workers.dev>，通过 Workers VPC 和命名 Cloudflare Tunnel 连接本机 5070。排队、留言、统计与推流信令在本机处理；游戏画面通过 WebRTC 直连或独立 TURN 中继传输。没有购买域名或启用付费方案。本机入口为 <http://127.0.0.1:18790/>。
 
 前端通过 `.github/workflows/pages.yml` 从功能分支 `codex/local-streaming-demo` 构建部署。仓库 Actions 变量 `VITE_API_BASE_URL` 指向 HTTPS 网关；它是公开地址，不得放入令牌或秘密。网关仅允许明确配置的浏览器来源，支持跨域预检；跨站访客身份不依赖第三方 Cookie。源码变更保留功能分支与 PR 审核流程，不自行合并主分支。
 
@@ -18,6 +18,20 @@ cd C:\SeeleAI\chasheo.github.io
 ```
 
 主页面领取入场券，再确认进入。另一窗口/独立标签页可以作为第二位访客排队。游戏菜单默认使用自由鼠标；需要持续转动视角时点击「锁定鼠标」，Esc 释放。「开启声音」解除浏览器初始静音；「沉浸游玩」进入全屏。
+
+### 登录自启与恢复
+
+Cloudflared 已作为 Windows 自动启动服务运行；游戏后台使用当前用户的计划任务，登录时启动，每分钟检查一次，后台崩溃后自动恢复。任务不保存密码，以普通权限运行；`start-demo.ps1` 的 PID 校验和宿主文件锁避免启动第二个后台。游戏仍只在访客确认入场后启动，后台自启不会预先打开游戏。
+
+```powershell
+# 安装或更新当前用户的后台自启，立即检查一次
+.\install-local-autostart.ps1
+# 准备手动停止后台时，先取消自动恢复，再停止后台
+.\install-local-autostart.ps1 -Remove
+.\stop-demo.ps1
+```
+
+任务名为 `chasheo-worlds-local-host`。电脑需要保持开机、联网且该 Windows 用户已登录；关机、休眠或注销后游玩和社区接口会离线，GitHub Pages 页面仍可打开。固定入口不因重启连接器而改变。不要删除 `seele-dev/temp/chasheo-demo`，当前游戏包和 Python 环境仍位于其中。
 
 ## 文件与配置
 
@@ -75,7 +89,29 @@ uv pip install --python $python pytest==8.4.2 psutil==7.1.3
 
 该脚本配置明确的允许来源，重启空闲宿主，验证公网健康检查，然后更新公开 API 地址并触发功能分支的 Pages 部署。它不提交、推送或合并源码；使用 `-Publish` 前需已提交并推送所需改动。仅映射回环网关 18790；18791、18888、UE 编辑器和开发命令接口保持私有。
 
-[Quick Tunnel](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) 免费、无需账户或域名，但没有可用性保证，重建后地址改变；需重新执行上述配置和部署。电脑休眠、宿主停止或隧道窗口关闭都会使游玩、留言和统计暂时离线，原有数据不会丢失。稳定入口需要个人域名和命名 Tunnel。
+[Quick Tunnel](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) 免费、无需账户或域名，但没有可用性保证，重建后地址改变；需重新执行上述配置和部署。电脑休眠、宿主停止或隧道窗口关闭都会使游玩、留言和统计暂时离线，原有数据不会丢失。固定入口可用自有域名绑定命名 Tunnel，也可验证下面的 Workers VPC 方案。
+
+## 当前固定免费入口：Workers VPC
+
+`edge/gateway.mjs` 提供 `workers.dev → Worker → VPC Service → 命名 Tunnel → 本机 127.0.0.1:18790` 的入口，不需要先购买域名。只公开列出的游戏与社区 API，以及单次凭证保护的 `/stream`；会话、Windows 进程锁和 SQLite 仍由本机宿主管理。Worker 直接转交 WebSocket 升级响应，保留认证头、访客凭证和原始 Origin，不记录 URL、票据或服务异常内容。
+
+Cloudflare [Workers VPC](https://developers.cloudflare.com/workers-vpc/) 当前处于 Beta，Beta 期间适用于 Workers 免费和付费方案；[Workers 免费版](https://developers.cloudflare.com/workers/platform/limits/) 当前限每天 100,000 次请求。`workers.dev` 是 Cloudflare 提供的固定项目地址，网络可达性需独立验证。媒体继续通过 WebRTC 直连或 TURN 传输，不经过 Worker 转发。
+
+部署前使用个人账户和独立的 `chasheo-home` 授权配置。所需 OAuth scopes 为 `account:read user:read workers:write workers_scripts:write connectivity:admin`；Wrangler 会附加离线登录权限。不得复用公司环境的 API token。命名 Tunnel 的安装 token 只负责运行连接器，Worker 部署需要单独授权。
+
+VPC Service 使用 HTTP、`127.0.0.1`、端口 `18790` 和个人命名 Tunnel ID；不要使用可访问整个网络的绑定。以 `edge/wrangler.example.jsonc` 创建不纳入 Git 的 `edge/wrangler.local.jsonc`，填写个人 `account_id` 和 VPC `service_id`。验证使用 Wrangler 4.156.0、Node.js 22 及以上。
+
+```powershell
+node --test tests/test_edge_gateway.mjs
+# 先验证打包；不会部署云资源
+npx wrangler@4.156.0 deploy --dry-run --config edge/wrangler.local.jsonc
+# 使用已授权的个人 profile 部署
+npx wrangler@4.156.0 deploy --config edge/wrangler.local.jsonc --profile chasheo-home
+```
+
+2026-10-31 验证：5 项网关检查、22 项后台检查与前端构建通过。经本机现有 HTTP 代理，VPC 入口通过评论/CORS/身份隔离检查和真实 Windows 游戏生命周期测试；启用自动恢复后的复测在失联约 120.78 秒后回收，WSS 连接撤销、排队交接和单实例均通过。本机直接连接超时；用户报告手机蜂窝网络直连不可用、开启 Clash 后 `/api/health` 返回 `ok: true`。用户随后选择使用此免费固定入口，主页后端据此切换到 Worker。地址固定并不保证各访客网络都能直连；代理链路的成功不代表直连或浏览器视频验收。
+
+`tests/verify_live_host.py --base-url <HTTPS地址> --proxy-from-env` 可显式使用已有 `HTTPS_PROXY`/`ALL_PROXY`，只记录使用代理的事实，不记录代理值；默认仍是直连。证据文件在本机运行目录的 `evidence/`，分别标注测试路径。命名 Tunnel 已安装为 Windows 自动启动服务，故障后等待 20 秒重启；Python 游戏宿主通过上文的用户计划任务自启和恢复。临时 Quick Tunnel 不再作为主页默认后端，也不需要手动保持临时隧道窗口。
 
 ## 可选：个人 Cloudflare TURN
 

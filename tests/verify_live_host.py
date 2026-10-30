@@ -8,6 +8,7 @@ import ctypes
 from ctypes import wintypes
 from contextlib import AsyncExitStack
 import json
+import os
 from pathlib import Path
 import re
 import time
@@ -17,12 +18,18 @@ import psutil
 
 BASE = 'http://127.0.0.1:18790'
 ORIGIN = 'https://chasheo.github.io'
+USE_ENV_PROXY = False
 RUNTIME = Path(__file__).resolve().parents[1] / '.local.json'
 RUNTIME = Path(json.loads(RUNTIME.read_text())['runtime_dir'])
 
 
 async def verify():
-    receipt = {'heartbeat_timeout': 120, 'base_url': BASE, 'checks': {}, 'events': [], 'status': 'running'}
+    proxy = (os.environ.get('HTTPS_PROXY') or os.environ.get('ALL_PROXY') or os.environ.get('HTTP_PROXY')) if USE_ENV_PROXY else None
+    if USE_ENV_PROXY and (not proxy or not proxy.startswith(('http://', 'https://'))):
+        raise RuntimeError('An existing HTTP(S) proxy must be configured in the environment.')
+    receipt = {'heartbeat_timeout': 120, 'base_url': BASE,
+               'client_route': 'configured HTTP proxy' if proxy else 'direct',
+               'checks': {}, 'events': [], 'status': 'running'}
     evidence = RUNTIME / 'evidence'
     evidence.mkdir(exist_ok=True)
 
@@ -52,7 +59,7 @@ async def verify():
                 if p.info['name'] == 'MCPGameProject.exe' and p.info['exe']
                 and 'chasheo-demo' in p.info['exe'] and running(p.pid)]
 
-    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15), headers={'Origin': ORIGIN}) as http, AsyncExitStack() as cleanup:
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15), headers={'Origin': ORIGIN}, proxy=proxy) as http, AsyncExitStack() as cleanup:
         async def call(path, token='', method='POST', expect=200):
             async with http.request(method, BASE + '/api/' + path,
                                     headers={'Authorization': 'Bearer ' + token} if token else {}) as response:
@@ -172,6 +179,8 @@ async def verify():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--base-url', default=BASE)
+    parser.add_argument('--proxy-from-env', action='store_true', help='Use the existing HTTPS_PROXY or ALL_PROXY without logging its value.')
     args = parser.parse_args()
     BASE = args.base_url.rstrip('/')
+    USE_ENV_PROXY = args.proxy_from_env
     asyncio.run(verify())
