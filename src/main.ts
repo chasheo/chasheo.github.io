@@ -299,7 +299,11 @@ async function initializeServices() {
 await selectService();
 if (HAS_SERVICE) {
   void poll(true);
-  setInterval(() => void poll(), 2000);
+  // Queue offers need a prompt update; idle and active pages use the heartbeat
+  // timer instead so a forgotten tab does not exhaust the free request quota.
+  setInterval(() => {
+    if (!document.hidden && current && ['waiting', 'offered', 'starting'].includes(current.state)) void poll();
+  }, 5000);
   setInterval(() => void poll(true), 15000);
   window.addEventListener('online', () => void poll(true));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) void poll(true); });
