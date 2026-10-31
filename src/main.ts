@@ -5,6 +5,26 @@ import { initCommunity, updateStats } from './community';
 import { HAS_SERVICE, apiUrl, streamUrl, selectService } from './service';
 import { initLibrary, selectedGame, setLibrarySession } from './library';
 
+const heroFilm = document.querySelector<HTMLVideoElement>('.hero-film');
+if (heroFilm) {
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && !reducedMotion.matches) {
+      void heroFilm.play().catch(() => {});
+    } else {
+      heroFilm.pause();
+    }
+  }, { threshold: 0.1 });
+  observer.observe(heroFilm);
+  window.addEventListener('scroll', () => {
+    if (reducedMotion.matches || !Number.isFinite(heroFilm.duration)) return;
+    const progress = Math.min(1, Math.max(0, window.scrollY / window.innerHeight));
+    if (progress > 0 && progress < 1) {
+      heroFilm.currentTime = progress * (heroFilm.duration - 0.04);
+    }
+  }, { passive: true });
+}
+
 type SessionState = { id: string; state: string; position: number; waiting: number; reason: string; game_id?: string;
   offer_remaining: number; lease_remaining: number | null; heartbeat_timeout: number };
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
