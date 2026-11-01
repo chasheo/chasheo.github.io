@@ -188,8 +188,8 @@ export async function initWorldScene() {
     for (let i = sparks.length - 1; i >= 0; i--) { const s = sparks[i]; s.life -= dt; s.velocity.y -= dt * 5; s.mesh.position.addScaledVector(s.velocity, dt); (s.mesh.material as THREE.MeshBasicMaterial).opacity = Math.max(0, s.life * 2); if (s.life <= 0) { scene.remove(s.mesh); (s.mesh.material as THREE.Material).dispose(); sparks.splice(i, 1); } }
     portalMaterial.uniforms.open.value = THREE.MathUtils.damp(portalMaterial.uniforms.open.value, game.won ? 1 : .12, 2, dt); portalMaterial.uniforms.time.value = time; beacon.intensity = game.won ? 3 : .1;
     if (active) {
-      desiredTarget.set(observing ? 0 : game.won ? game.player.x : game.player.x * .7 + game.enemy.x * .3, 1.1, observing ? -.5 : game.won ? game.player.z : game.player.z * .7 + game.enemy.z * .3);
-      const viewDistance = distance * (camera.aspect < .8 ? 1.6 : 1);
+      desiredTarget.set(game.won ? game.player.x : game.player.x * (observing ? .5 : .7) + game.enemy.x * (observing ? .5 : .3), 1.1, game.won ? game.player.z : game.player.z * (observing ? .5 : .7) + game.enemy.z * (observing ? .5 : .3));
+      const viewDistance = distance * (camera.aspect < .8 ? 1.6 : 1) * (observing ? 1.15 : 1);
       desired.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(viewDistance).add(desiredTarget);
       raycaster.set(desiredTarget, desired.clone().sub(desiredTarget).normalize()); raycaster.far = viewDistance; const collision = raycaster.intersectObjects(obstacles, false)[0];
       if (collision) desired.copy(desiredTarget).addScaledVector(raycaster.ray.direction, Math.max(1.8, collision.distance - .35));
