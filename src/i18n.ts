@@ -1,6 +1,8 @@
 const translations: Record<string, string> = {
   '世界':'World','游玩':'Play','留言':'Guestbook','把一个想法，变成能走进去的世界。':'Turning ideas into worlds you can enter.',
   '世界，':'WORLDS,','正在':'IN THE','生成':'MAKING',
+  '让想法':'BUILD','成为世界':'WORLDS',
+  '选择世界':'Choose a world','留下':'Leave','你的足迹。':'your mark.',
   '滚动页面，探索实时 3D 场景':'Scroll to explore the 3D scene',
   '你好，我是 chasheo。欢迎来到我的游乐场。':'Hi, I’m chasheo. Welcome to my playground.','进入世界':'Enter world','留下探索足迹':'Leave a note',
   '移动鼠标或滚动，探索实时 3D 场景':'Scroll to explore the 3D scene', '每一次到来，':'Every visit','都让世界多一点回响。':'leaves a trace.',

@@ -30,10 +30,10 @@ export async function initWorldScene() {
   gltf.animations.forEach(clip => mixer.clipAction(clip).play());
   document.body.classList.add('has-3d');
   const clock = new THREE.Clock();
-  const from = new THREE.Vector3(-2.4, 5.7, 20);
+  const from = new THREE.Vector3(-2.0, 3.2, 13.8);
   const near = new THREE.Vector3(2.4, 1.66, 4.05);
   const end = new THREE.Vector3(2.0, 2.2, 6.4);
-  const fromTarget = new THREE.Vector3(.3, 2.65, -3);
+  const fromTarget = new THREE.Vector3(.15, 1.7, -.8);
   const nearTarget = new THREE.Vector3(0, 1.22, -.03);
   const endTarget = new THREE.Vector3(0, 1.25, -.1);
   const target = new THREE.Vector3();

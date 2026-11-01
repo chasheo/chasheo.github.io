@@ -86,3 +86,42 @@ body.has-3d .hero-art { background: transparent; }
 .language-toggle { border: 0; background: transparent; color: #f4f5ee; font: inherit; font-size: 15px; padding: 12px; cursor: pointer; white-space: nowrap; }
 .language-toggle:focus-visible { outline: 2px solid #d8e9bd; outline-offset: 3px; }
 @media(max-width:760px) { .masthead { gap: 8px; } .language-toggle { font-size: 14px; padding: 8px; } .tiny-label, .eyebrow, .hero .eyebrow, .stage-label, .hero-caption, .scroll-cue, .poster-disclosure { font-size: 14px; } .section-copy, .library-heading > p, .game-card-content > p, .admission-copy, .seat-state, .session-message, .comment-content p, .footer p { font-size: 16px; } }
+/* Mountain world: warm ink, open composition and readable controls. */
+:root{--acid:#e8d8ae;--paper:#f5f0e3;--ink:#151c18;--accent:#b95d48}
+body{background:#101916;color:var(--paper)}
+a,button{transition:color .25s ease,background-color .25s ease,border-color .25s ease,opacity .25s ease}
+.masthead{height:92px;padding:0 clamp(24px,5vw,88px);border-bottom:1px solid #e5d9b42a;display:flex;align-items:center;gap:clamp(18px,3vw,52px)}
+.wordmark,.footer-brand{color:#f6eedc;letter-spacing:-.04em}.brand-mark,.brand-period{color:#d09072}
+.masthead nav{margin-left:auto;gap:clamp(20px,2.8vw,48px)}
+.masthead nav a{color:#e5e1d6;font-size:15px}.masthead nav a>span{display:none}
+.github-link{color:#e4d6c1;font-size:14px}.language-toggle{color:#f5eddd;margin-left:0}
+.hero{height:100svh;min-height:700px;max-height:none}
+.hero-art{inset:0}.hero-shade,body.has-3d .hero-shade{background:linear-gradient(90deg,rgba(11,19,17,.91) 0%,rgba(11,19,17,.72) 23%,rgba(11,19,17,.18) 51%,transparent 77%),linear-gradient(0deg,rgba(11,19,17,.78) 0%,transparent 25%,rgba(11,19,17,.23) 100%)}
+.hero-copy{margin-left:clamp(24px,6.4vw,112px);padding-top:clamp(170px,24vh,280px);max-width:min(38vw,510px)}
+.hero .eyebrow{font-size:14px;letter-spacing:.12em;color:#d9c49c}.hero .status-dot{background:#c77c5d;box-shadow:0 0 14px #c77c5d75}
+.hero h1{font-family:Georgia,'Noto Serif SC','Songti SC','SimSun',serif;font-size:clamp(55px,6.1vw,102px);font-weight:500;line-height:1.18;letter-spacing:.015em;margin:27px 0 30px}
+.hero h1 .outlined{-webkit-text-stroke:0;color:inherit}.hero h1 .title-period{color:#c5795e}
+.hero-description{gap:14px}.hero-description .hero-bracket{color:#bd795e}.hero-description p{font-size:16px;line-height:1.85;color:#f4eede}.hero-description p>span{font-size:15px;color:#d7d2c3}
+.hero-buttons{gap:24px;margin-top:34px;align-items:center}.enter-world{min-width:192px;min-height:58px;padding:12px 18px;border:1px solid #e4c69c80;background:#eee0c3;color:#17201b}
+.enter-world:hover{background:#fff2d8}.enter-world .button-orbit{background:#a84e3c;color:#fff}.enter-world>span:nth-child(2){font-size:16px}.enter-world small{display:none}.enter-world .button-end{color:#25372d}
+.hero-intro .subtle-link{color:#e9ddc9;font-size:15px}.hero-caption{right:clamp(24px,5vw,80px);bottom:37px;text-align:right;color:#f3ead9;max-width:280px}
+.hero-caption>span:first-child,.hero-meta,.scroll-cue,.hero-grid,.portal-coordinate,.world-ticker{display:none}
+.hero-caption>span:last-child{font-size:14px;letter-spacing:.02em}
+.stats-band{padding-top:30px;padding-bottom:30px;border-top:1px solid #ede1c62a;border-bottom:1px solid #ede1c62a;background:transparent;gap:22px}
+.stats-intro{display:none}.stat{border:0;padding:0 22px 0 0;gap:5px}.stat strong{font-family:Georgia,serif;color:#f4e9d4}.stat>span:last-child{font-size:15px;color:#ded6c7}
+.play-section{padding-top:90px}.section-heading{align-items:end;gap:35px}.section-heading h2,.guestbook-intro h2{font-family:Georgia,'Noto Serif SC','Songti SC','SimSun',serif;color:#f6efdf;font-weight:500;letter-spacing:-.02em}
+.section-heading h2>span,.guestbook-intro h2 em,.signature em{font-family:inherit;color:#dfcda7}
+.section-heading .section-copy{background:transparent;border:0;padding:0;color:#e6ddce;font-size:16px;line-height:1.8}
+.library{padding:0;margin:0 0 42px;background:transparent;border:0}.library-heading{align-items:end;margin-bottom:20px}.library-heading h3{font-family:Georgia,'Songti SC','SimSun',serif;color:#f4ecdc;font-size:32px}.library-heading h3 span{color:#c98062}.library-heading>p{color:#ded6c6;font-size:15px}
+.game-card,.game-card.selected,.game-card:hover{background:rgba(18,27,23,.92);border:0;box-shadow:0 18px 50px #0003}.game-card-content{padding:24px 28px}.game-card h4{color:#f8f1e4}.game-card-content>p{color:#d0c9bc}.game-card-actions button{border-color:#c2ae8b;color:#f0e4ce}.game-card-actions button:hover:not(:disabled){background:#e8d8ae;color:#18211b}.game-download{color:#e7d3a8}
+.experience{background:transparent;border:0;box-shadow:0 18px 60px #03060555}.admission{background:rgba(16,26,22,.96);border:0;padding:clamp(24px,2.7vw,42px)}.admission h3{font-family:Georgia,'Songti SC','SimSun',serif;font-weight:500;color:#f6eee0}.admission h3>span,.queue-number strong{color:#e9d3ad}
+.primary{background:#e8d7b6;color:#1b241c;border:0;font-size:16px}.primary:hover:not(:disabled){background:#f7eace}.seat-state,.admission-copy,.session-message,.admission-footer p{color:#ded9ca}.admission-top .tiny-label,.admission-footer .tiny-label{color:#c9bda5}
+.player-toolbar,.comment-form{background:rgba(16,26,22,.97);border:0}.player-actions button,.session-actions button{color:#ead6b7}.play-footnote{color:#e2d8c4}
+.guestbook{gap:clamp(40px,6vw,100px)}.guestbook-intro>p:not(.eyebrow),.footer p,.comment-content p{color:#ded5c6}.guestbook-counter{border-color:#d6c5a83d}.comment-form textarea,.name-field input{color:#f7f0e2}.comment-form textarea::placeholder,.name-field input::placeholder{color:#bcb5a5}.comment-avatar{background:#303f32;border-color:#9b9e80;color:#efe5d2}.comment-list-head,.footer{border-color:#d6c5a83d}
+.hero-intro .subtle-link:hover,.masthead nav a:hover,.language-toggle:hover,.github-link:hover{color:#e8b69a}
+@media(max-width:760px){.masthead{height:72px;padding:0 18px;gap:10px}.masthead nav{gap:14px}.masthead nav a{font-size:14px}.github-link{display:none}.language-toggle{font-size:14px;padding:8px}.hero{height:100svh;min-height:660px}.hero-copy{max-width:min(80vw,400px);margin-left:24px;padding-top:clamp(150px,20vh,200px)}.hero h1{font-size:clamp(48px,11vw,72px);margin:23px 0;line-height:1.2}.hero-description{background:transparent;padding:0}.hero-description p,.hero-description p>span{font-size:15px}.hero-buttons{margin-top:26px;gap:16px;flex-wrap:wrap}.enter-world{min-width:170px;min-height:54px}.hero-caption{bottom:26px;right:24px}.hero-shade,body.has-3d .hero-shade{background:linear-gradient(90deg,#0a1311df 0%,#0a131190 42%,#0a13112b 100%),linear-gradient(0deg,#0a1311b0,transparent 26%)}.stats-band{padding-top:24px;padding-bottom:24px;gap:10px}.stat{padding-right:8px}.stat>span:last-child{font-size:14px}.play-section{padding-top:60px}.library-heading>p{text-align:left}.experience{box-shadow:0 10px 35px #0004}.admission{padding:26px}.section-heading .section-copy{font-size:15px}.guestbook{padding-top:70px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.play-footnote{position:relative;color:#fff7e9;text-shadow:0 1px 8px #07110e,0 1px 3px #07110e;font-size:15px;line-height:1.6}
+.guestbook-intro{background:linear-gradient(90deg,rgba(8,18,14,.74),rgba(8,18,14,0));padding:24px 24px 24px 0}
+@media(max-width:760px){.play-footnote{font-size:14px}.guestbook-intro{padding:20px 0}}
+body .controls-hint,body .controls-hint>.tiny-label,body .poster-disclosure,body .game-card-badge,body .game-card-caption,body .comment-meta time,body .name-field small{font-size:14px}body .controls-hint kbd{font-size:12px}
