@@ -24,5 +24,12 @@
     "purpose": "An actual browser screenshot of Mystic Forest gameplay within an older version of this homepage.",
     "source": "Owner-provided MysticForest Windows package, local browser validation",
     "disclosure": "Actual browser screenshot; not a full-resolution standalone game screenshot."
+  },
+  "mountain-world.glb": {
+    "purpose": "Real-time 3D mountain courtyard scene and animations",
+    "source": "Blender scene assembled using Seele asset library and Poly Haven textures",
+    "assets": "Seele 224184, 662537, 1048237, 691062, 664289, 1026089, 689149, 600746, 259582, 1096815, 920085",
+    "license": "Public redistribution rights for Seele assets have not yet been verified",
+    "processing": "Exported from local Blender scene to glTF with Draco compression"
   }
 }

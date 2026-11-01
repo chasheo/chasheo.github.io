@@ -72,3 +72,17 @@ body .game-card-actions button,body .game-download,body .player-actions button,b
 .section-heading h2>span,.signature em,.guestbook-intro h2 em{color:#a6cce1;font-family:inherit;font-style:normal}
 @media(max-width:760px){.hero-caption{bottom:77px;max-width:78%}.hero-description{background:#070b14d9;padding:6px 10px 6px 0;max-width:max-content}.enter-world{background:#07101edb}.hero .scroll-cue{bottom:28px}}
 @media(min-width:761px) and (max-height:780px){.hero{min-height:680px;height:100svh}.hero-copy{padding-top:140px}.hero h1{font-size:clamp(80px,8.5vw,135px);margin:24px 0 20px}.hero-buttons{margin-top:18px}.hero-caption{bottom:65px}.scroll-cue{bottom:20px}.hero-meta{bottom:20px}}
+/* A single persistent world sits behind each section. */
+body { background: #111b19; }
+.world-canvas { position: fixed; inset: 0; z-index: -1; }
+.hero-art { background: rgba(8, 15, 15, .45) url('/media/mountain-duel-poster.png') center / cover no-repeat; }
+body.has-3d .hero-art { background: transparent; }
+.hero-shade, body.has-3d .hero-shade { background: linear-gradient(90deg, #081011df 0%, #081011a8 36%, #08101124 80%), linear-gradient(0deg, #08101170, transparent 35%); }
+.library, .admission, .comment-form { border: 0; background: rgba(8, 16, 17, .78); }
+.experience, .game-card, .guestbook-content, .section-copy { border: 0; }
+.hero-grid, .portal-coordinate, .ticket-perforation, .stats-note, .signature-note, .stage-top .stage-label, .stage-bottom, .play-footnote a { display: none; }
+.tiny-label, .eyebrow, .hero .eyebrow, .stage-label, .hero-caption, .scroll-cue, .game-card-badge, .game-card-caption, .poster-disclosure { font-size: 14px; letter-spacing: .04em; }
+.section-copy, .library-heading > p, .game-card-content > p, .admission-copy, .seat-state, .session-message, .admission-footer p, .guestbook-intro > p:not(.eyebrow), .comment-content p, .footer p, .controls-hint, .player-actions button { font-size: 16px; line-height: 1.6; }
+.language-toggle { border: 0; background: transparent; color: #f4f5ee; font: inherit; font-size: 15px; padding: 12px; cursor: pointer; white-space: nowrap; }
+.language-toggle:focus-visible { outline: 2px solid #d8e9bd; outline-offset: 3px; }
+@media(max-width:760px) { .masthead { gap: 8px; } .language-toggle { font-size: 14px; padding: 8px; } .tiny-label, .eyebrow, .hero .eyebrow, .stage-label, .hero-caption, .scroll-cue, .poster-disclosure { font-size: 14px; } .section-copy, .library-heading > p, .game-card-content > p, .admission-copy, .seat-state, .session-message, .comment-content p, .footer p { font-size: 16px; } }
