@@ -106,6 +106,7 @@ def test_multiple_configured_games_launch_only_the_selected_server_owned_executa
 
     (tmp_path / 'dist' / 'assets').mkdir(parents=True)
     (tmp_path / 'dist' / 'media').mkdir()
+    (tmp_path / 'dist' / 'draco').mkdir()
     monkeypatch.setattr(gateway, 'ROOT', tmp_path)
     first_exe, second_exe = tmp_path / 'one.exe', tmp_path / 'two.exe'
     first_exe.touch(); second_exe.touch()
@@ -150,6 +151,9 @@ def test_github_pages_cors_and_comment_ownership_without_cookies(tmp_path, monke
 
     (tmp_path / 'dist' / 'assets').mkdir(parents=True)
     (tmp_path / 'dist' / 'media').mkdir()
+    (tmp_path / 'dist' / 'draco').mkdir()
+    decoder = b'\x00asm\x01\x00\x00\x00'
+    (tmp_path / 'dist' / 'draco' / 'draco_decoder.wasm').write_bytes(decoder)
     monkeypatch.setattr(gateway, 'ROOT', tmp_path)
 
     async def check():
@@ -159,6 +163,11 @@ def test_github_pages_cors_and_comment_ownership_without_cookies(tmp_path, monke
         # Exercise actual HTTP boundaries while keeping production process startup out of this test.
         app.cleanup_ctx.clear()
         async with TestClient(TestServer(app), cookie_jar=CookieJar()) as client:
+            decoder_response = await client.get('/draco/draco_decoder.wasm')
+            assert decoder_response.status == 200
+            assert decoder_response.content_type == 'application/wasm'
+            assert await decoder_response.read() == decoder
+            assert (await client.get('/draco/')).status == 403
             origin = {'Origin': 'https://chasheo.github.io'}
             preflight = await client.options('/api/comments', headers={**origin,
                 'Access-Control-Request-Method': 'POST',

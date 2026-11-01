@@ -1,0 +1,102 @@
+{
+  "characters": {
+    "heroine.glb": "Existing Red swordswoman / Kachujin rig and material extracted from mountain-world.glb",
+    "opponent.glb": "Existing Brown swordsman (Seele 224184) extracted from mountain-world.glb"
+  },
+  "weapon": "Existing textured jian (Seele 662537), now rigid-skinned to wrist rather than independently animated",
+  "clips": {
+    "idle": {
+      "retrieval_category": "three_motion",
+      "source_url": "https://asset.seeles.ai/asset/export/38430025-6df6-481d-a771-56fd0a6841c9/1077382/source.fbx",
+      "source_tag": "Sword And Shield Idle",
+      "embedded_action_name": "Armature|mixamo.com|Layer0",
+      "source_fps": 30,
+      "source_frame_trim": "full",
+      "sha256_source": "1f57afd187fda822c84b84a8e21702053486150b886f546039f02a7877d0d850"
+    },
+    "run": {
+      "retrieval_category": "three_motion",
+      "source_url": "https://asset.seeles.ai/asset/export/80c87833-82d8-47e0-9529-e5b8e1c82491/1071289/source.fbx",
+      "source_tag": "Running",
+      "embedded_action_name": "Armature|mixamo.com|Layer0",
+      "source_fps": 30,
+      "source_frame_trim": "full",
+      "sha256_source": "e03e4b1e91314160396d4156352c439e633092a679bf1a70736e407d49dc23b1"
+    },
+    "attack": {
+      "retrieval_category": "three_motion",
+      "source_url": "https://asset.seeles.ai/asset/export/44414c8c-13a2-44e6-9ddf-4e90b8a9eabd/1068934/source.fbx",
+      "source_tag": "Standing Melee Attack Horizontal",
+      "embedded_action_name": "Armature|mixamo.com|Layer0",
+      "source_fps": 30,
+      "source_frame_trim": [
+        12,
+        50
+      ],
+      "sha256_source": "800c91ada5c23ce8feba7899b59bdfb2464f0ec75a8af671d169eb03d4cb6d9d"
+    },
+    "dodge": {
+      "retrieval_category": "three_motion",
+      "source_url": "https://asset.seeles.ai/asset/export/f6517e87-1ed2-4e7b-a358-968f46eb0d4c/1080435/source.fbx",
+      "source_tag": "Dodging Right",
+      "embedded_action_name": "Armature|mixamo.com|Layer0",
+      "source_fps": 30,
+      "source_frame_trim": [
+        10,
+        33
+      ],
+      "sha256_source": "ba6e3a78db45d2653c1d82b9964a3420b5cf96fdd14aca164707ed3eefa7b3bf"
+    },
+    "hurt": {
+      "retrieval_category": "three_motion",
+      "source_url": "https://asset.seeles.ai/asset/export/c412a3af-edbd-40e8-8dab-e3dd4dfeb8eb/1068818/source.fbx",
+      "source_tag": "Hit Reaction",
+      "embedded_action_name": "Armature|mixamo.com|Layer0",
+      "source_fps": 30,
+      "source_frame_trim": [
+        8,
+        26
+      ],
+      "sha256_source": "92a49b9b26da82ab8d3844b8f7e71b085c340d9d2093abeedf7375acbf5531d3"
+    },
+    "death": {
+      "retrieval_category": "three_motion",
+      "source_url": "https://asset.seeles.ai/asset/export/641282df-4744-45f2-942e-3610c00b5054/1079452/source.fbx",
+      "source_tag": "Dying Backwards",
+      "embedded_action_name": "Armature|mixamo.com|Layer0",
+      "source_fps": 30,
+      "source_frame_trim": "full",
+      "sha256_source": "d02a161a9ca019dcfbf914086f6bd2e62046729fe4dddd49b01ec9312b6af7f7"
+    }
+  },
+  "capture_provenance": "Retrieved Mixamo-family library animation. FBX contains mixamo.com action names. No new video-to-motion-capture service was run. Source service does not provide original capture-session provenance.",
+  "processing": [
+    "Blender 5.2 headless world-space rotational retargeting to retained character rigs",
+    "65 matched heroine bones, 51 matched opponent bones",
+    "Horizontal root travel removed; vertical weight shifts retained",
+    "Named state clips and trimmed attack/dodge/hurt active windows",
+    "Small idle/run loop seam blended over four frames",
+    "Wrist skin attachment for the textured sword",
+    "WebP textures and Draco mesh compression; unused facial morph data omitted",
+    "1.78 metre characters; floor origin; glTF forward +Z"
+  ],
+  "verification": {
+    "source_motion_scan": "Every source frame scanned over matched joint rotations; no sustained static holds found in selected intervals",
+    "export": "Reimported both GLBs, confirmed six clips and visually checked seven attack poses per character",
+    "preview": "attack-contact-sheet.png retained in local development temp"
+  },
+  "runtime": {
+    "clip_names": [
+      "idle",
+      "run",
+      "attack",
+      "dodge",
+      "hurt",
+      "death"
+    ],
+    "attack_contact_normalized": 0.47,
+    "suggested_player_attack_duration": 0.95,
+    "suggested_enemy_attack_duration": 1.38
+  },
+  "license": "Inherited Seele source redistribution rights have not been independently verified; see ../SOURCES.json. Preserve upstream attribution."
+}

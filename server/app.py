@@ -359,6 +359,7 @@ def create_app(config: dict, *, process_factory=WindowsJobProcess) -> web.Applic
                     web.get('/', index), web.options('/{path:.*}', preflight)])
     app.router.add_static('/assets', ROOT / 'dist' / 'assets', show_index=False)
     app.router.add_static('/media', ROOT / 'dist' / 'media', show_index=False)
+    app.router.add_static('/draco', ROOT / 'dist' / 'draco', show_index=False)
     return app
 
 

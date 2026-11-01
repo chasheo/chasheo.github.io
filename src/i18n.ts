@@ -1,4 +1,8 @@
 const translations: Record<string, string> = {
+  '世界工坊':'World Workshop','由你唤醒':'AWAKEN IT',
+  '接管女侠，走进一场属于你的试炼。':'Take control of the wanderer. Make this trial your own.',
+  '你好，我是 chasheo。这里的世界，等待你的参与。':'Hi, I’m chasheo. These worlds are waiting for you.',
+  '直接选择游戏':'Browse the games','滚动探索地点 · 进入工坊自由行动':'Scroll between places · Enter the workshop to explore',
   '世界':'World','游玩':'Play','留言':'Guestbook','把一个想法，变成能走进去的世界。':'Turning ideas into worlds you can enter.',
   '世界，':'WORLDS,','正在':'IN THE','生成':'MAKING',
   '让想法':'BUILD','成为世界':'WORLDS',
@@ -116,6 +120,7 @@ export function initI18n() {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
     control.textContent = language === 'zh' ? '中文 / EN' : 'EN / 中文';
     control.setAttribute('aria-label', language === 'zh' ? 'Switch to English' : '切换到中文');
+    document.querySelector('#title')?.setAttribute('aria-label', language === 'zh' ? '世界工坊，由你唤醒' : 'World Workshop. Awaken it.');
     const name = document.querySelector<HTMLInputElement>('#comment-name');
     const message = document.querySelector<HTMLTextAreaElement>('#comment-body');
     if (name) name.placeholder = language === 'zh' ? '怎么称呼你？' : 'Your name';

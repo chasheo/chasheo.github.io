@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="480" viewBox="0 0 960 480">
+  <title>Orbital Garage — architectural concept illustration, not a game screenshot</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#071321"/><stop offset="1" stop-color="#426577"/></linearGradient>
+    <linearGradient id="wall" x2="1" y2="1"><stop stop-color="#1d303c"/><stop offset="1" stop-color="#08131c"/></linearGradient>
+    <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#314752"/><stop offset="1" stop-color="#101e28"/></linearGradient>
+    <linearGradient id="body" x2="0" y2="1"><stop stop-color="#d2d6ca"/><stop offset=".5" stop-color="#82999d"/><stop offset="1" stop-color="#233a48"/></linearGradient>
+    <radialGradient id="planet"><stop stop-color="#b8cbd0"/><stop offset=".72" stop-color="#68858d"/><stop offset="1" stop-color="#304f61"/></radialGradient>
+    <radialGradient id="light"><stop stop-color="#a9dae1" stop-opacity=".35"/><stop offset="1" stop-color="#a9dae1" stop-opacity="0"/></radialGradient>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h960v480H0z"/>
+  <g fill="#cadbe2" opacity=".6"><circle cx="465" cy="45" r="1"/><circle cx="610" cy="78" r="1.5"/><circle cx="534" cy="145" r="1"/><circle cx="430" cy="115" r="1"/><circle cx="738" cy="43" r="1"/><circle cx="677" cy="165" r="1.2"/></g>
+  <circle cx="675" cy="136" r="71" fill="url(#planet)"/>
+  <path d="M620 104q50-29 105 10M607 138q56-28 134-2M626 175q49-15 95-6" fill="none" stroke="#c1d3d2" stroke-width="7" opacity=".17"/>
+  <path fill="url(#floor)" d="M0 287h960v193H0z"/>
+  <path fill="url(#wall)" d="M0 0h410L251 67v220L0 480zm960 0H773l75 67v220l112 193z"/>
+  <path fill="#122530" d="M0 0h960v46H304L0 171z"/>
+  <path d="M252 287V67h597v220" fill="none" stroke="#9cb4bb" stroke-width="9"/>
+  <path d="M268 287V82h565v205" fill="none" stroke="#75c1ce" stroke-width="2"/>
+  <g fill="none" stroke="#6c8791" stroke-width="2" opacity=".6"><path d="M61 0v390M115 0v345M178 0v301M0 225l250-111M0 324l250-134M848 150l112 54M848 223l112 80"/><path d="M252 287L33 480M400 287l-64 193M548 287l90 193M697 287l245 193M1 420h959M136 350h779M222 307h639" opacity=".45"/></g>
+  <g fill="#d8dfd5"><path d="M19 128L220 46l4 7L19 138z"/><path d="M301 21h493v6H301z"/><path d="M869 69l75 50v8l-75-51z"/></g>
+  <ellipse cx="497" cy="356" rx="220" ry="90" fill="url(#light)"/>
+  <path d="M287 324l246-50 236 81-230 84-269-84z" fill="#172b37" stroke="#7897a1" stroke-width="2"/>
+  <path d="M306 329l225-44 217 69-208 73-249-73z" fill="none" stroke="#79bcc7" opacity=".65"/>
+  <ellipse cx="516" cy="354" rx="151" ry="26" fill="#06111a" opacity=".8"/>
+  <g fill="#081620" stroke="#566b74" stroke-width="3"><ellipse cx="426" cy="337" rx="22" ry="29"/><ellipse cx="608" cy="333" rx="22" ry="29"/><ellipse cx="390" cy="307" rx="15" ry="22"/><ellipse cx="569" cy="300" rx="15" ry="22"/></g>
+  <path d="M360 313l31-35 73-22 99 10 80 46-7 26-155 24-111-25z" fill="url(#body)" stroke="#c4d0cd" stroke-width="1.5"/>
+  <path d="M435 272l29-38 74 7 47 39-83 13z" fill="#69838d" stroke="#c5d4d3" stroke-width="1.5"/>
+  <path d="M466 242l64 6 34 28-60 10-56-17z" fill="#132c40"/>
+  <path d="M464 244l37 42M440 275l-15 53M587 290l-2 42M377 322l115 17 137-20" fill="none" stroke="#4d6875" stroke-width="2"/>
+  <path d="M493 342l32-5 3 5-35 6zm81-13l41-6 3 5-42 7z" fill="#d8f5ec"/>
+  <path d="M367 312l22 4v7l-19-4z" fill="#e6aa6e"/>
+  <g fill="#122732" stroke="#577785"><path d="M179 269l39-12 29 9v69l-40 15-28-10z"/><path d="M197 276l30-10v35l-30 10z" fill="#6ea9b4"/><path d="M797 258l23-4 20 7v63l-24 7-19-9z"/></g>
+  <path d="M239 311q80-40 136-10" fill="none" stroke="#a1b8b4" stroke-width="3"/>
+  <g fill="#bdcfd3" font-family="Arial,sans-serif" font-size="12" letter-spacing="3"><text x="285" y="111">ORBITAL / 02</text><text x="51" y="450" opacity=".65">CONCEPT STUDY</text></g>
+  <path d="M0 479h960" stroke="#a6c8cc" stroke-opacity=".2"/>
+</svg>
