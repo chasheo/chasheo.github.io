@@ -31,5 +31,34 @@
     "assets": "Seele 224184, 662537, 1048237, 691062, 664289, 1026089, 689149, 600746, 259582, 1096815, 920085",
     "license": "Public redistribution rights for Seele assets have not yet been verified",
     "processing": "Exported from local Blender scene to glTF with Draco compression"
+  },
+  "material_revision_2": {
+    "changes": [
+      "Two-metre ground UVs; 2K diffuse, roughness and normal maps",
+      "Metre-scaled wood/plaster UVs, bevelled architecture edges, textured stone threshold",
+      "Removed unused cinematic performers from environment export"
+    ],
+    "materials": [
+      {
+        "name": "brown_mud_leaves_01",
+        "source": "https://polyhaven.com/a/brown_mud_leaves_01",
+        "license": "CC0"
+      },
+      {
+        "name": "weathered_brown_planks",
+        "source": "https://polyhaven.com/a/weathered_brown_planks",
+        "license": "CC0"
+      },
+      {
+        "name": "rough_plaster_03",
+        "source": "https://polyhaven.com/a/rough_plaster_03",
+        "license": "CC0"
+      },
+      {
+        "name": "mossy_stone_wall",
+        "source": "https://polyhaven.com/a/mossy_stone_wall",
+        "license": "CC0"
+      }
+    ]
   }
 }

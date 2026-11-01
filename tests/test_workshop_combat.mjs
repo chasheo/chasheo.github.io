@@ -54,7 +54,7 @@ test('the same input at 60 and 120 rendering fps yields the same combat state', 
 test('a sword strike damages once and holding attack never auto-repeats', () => {
   const game = closePair();
   const events = advance(game, 2.8, { ...idle, attack: true });
-  assert.equal(game.enemy.health, 75);
+  assert.equal(game.enemy.health, 88);
   assert.equal(events.filter(e => e.type === 'hit' && e.actor === 'enemy').length, 1);
 });
 
@@ -64,7 +64,7 @@ test('damage begins at the retargeted sword contact, after the visible anticipat
   assert.equal(game.enemy.health, 100);
   assert.equal(anticipation.some(e => e.type === 'hit'), false);
   const contact = advance(game, .06);
-  assert.equal(game.enemy.health, 75);
+  assert.equal(game.enemy.health, 88);
   assert.equal(contact.filter(e => e.type === 'hit' && e.actor === 'enemy').length, 1);
   assert.equal(game.player.action, 'attack', 'the follow-through remains in the attack state');
 });
@@ -105,7 +105,7 @@ test('dodging too early leaves the player vulnerable after its immunity window',
 
 test('victory happens once, stops enemy damage and lets the visitor walk to the entrance', () => {
   const game = closePair();
-  game.enemy.health = 25;
+  game.enemy.health = 12;
   const events = advance(game, 1, { ...idle, attack: true });
   assert.equal(game.won, true);
   assert.equal(game.enemy.action, 'death');
@@ -115,6 +115,46 @@ test('victory happens once, stops enemy damage and lets the visitor walk to the 
   assert.ok(game.player.x > start);
   assert.equal(game.player.health, 100);
   assert.equal(later.some(e => e.type === 'victory'), false);
+});
+
+test('fresh presses queue three distinct attacks and only the final stage is heavy', () => {
+  const game = new WorkshopCombat();
+  Object.assign(game.player,{x:-3,z:3}); Object.assign(game.enemy,{x:3,z:-1.6});
+  const events=[];
+  events.push(...advance(game,.2,{...idle,attack:true}));
+  advance(game,.1);
+  events.push(...advance(game,.5,{...idle,attack:true}));
+  assert.equal(game.player.action,'attack2');
+  advance(game,.2);
+  events.push(...advance(game,.65,{...idle,attack:true}));
+  assert.equal(game.player.action,'heavy');
+  assert.deepEqual(events.filter(e=>e.type==='swing'&&e.actor==='player').map(e=>Boolean(e.heavy)),[false,false,true]);
+});
+
+test('light hits preserve the enemy attack, while a heavy strike interrupts and knocks it back', () => {
+  const light=closePair();Object.assign(light.enemy,{action:'cleave',actionTime:.08});
+  advance(light,.4,{...idle,attack:true});
+  assert.equal(light.enemy.health,88);assert.equal(light.enemy.action,'cleave');
+  const heavy=closePair();Object.assign(heavy.player,{action:'heavy',actionTime:.58});
+  Object.assign(heavy.enemy,{action:'cleave',actionTime:.2});
+  const before=heavy.enemy.z;const events=advance(heavy,.12);
+  assert.equal(heavy.enemy.action,'stagger');assert.ok(heavy.enemy.z<before);
+  assert.ok(events.some(e=>e.type==='hit'&&e.heavy));
+});
+
+test('a timed parry cancels incoming damage and creates a stronger counterattack', () => {
+  const game=closePair();waitForWindup(game,.55);
+  const parry=advance(game,.12,{...idle,parry:true});
+  assert.equal(game.player.health,100);assert.equal(game.enemy.action,'stagger');
+  assert.equal(parry.filter(e=>e.type==='parry').length,1);assert.equal(game.counterReady,true);
+  advance(game,.05);advance(game,.1,{...idle,attack:true});assert.equal(game.player.action,'counter');
+  const hit=advance(game,.3);assert.ok(hit.some(e=>e.type==='hit'&&e.actor==='enemy'&&e.heavy));
+});
+
+test('clicking parry just after impact restores the hit, while early parries and held buttons do not defend forever', () => {
+  const late=closePair();waitForWindup(late,.64);advance(late,.04);assert.equal(late.player.health,78);
+  const recovered=advance(late,.02,{...idle,parry:true});assert.equal(late.player.health,100);assert.ok(recovered.some(e=>e.type==='parry'));
+  const early=closePair();waitForWindup(early,.05);advance(early,.9,{...idle,parry:true});assert.equal(early.player.health,78);
 });
 
 test('defeat freezes control until an explicit reset restores both fighters', () => {

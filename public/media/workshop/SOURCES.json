@@ -90,13 +90,336 @@
       "idle",
       "run",
       "attack",
+      "attack2",
+      "heavy",
+      "counter",
+      "cleave",
+      "sweep",
+      "parry",
+      "stagger",
       "dodge",
       "hurt",
       "death"
     ],
-    "attack_contact_normalized": 0.47,
-    "suggested_player_attack_duration": 0.95,
+    "attack_contact_normalized": "Per-clip authored timing; see ATTACKS in workshop-gameplay.ts",
+    "suggested_player_attack_duration": 0.78,
     "suggested_enemy_attack_duration": 1.38
   },
-  "license": "Inherited Seele source redistribution rights have not been independently verified; see ../SOURCES.json. Preserve upstream attribution."
+  "license": "Inherited Seele source redistribution rights have not been independently verified; see ../SOURCES.json. Preserve upstream attribution.",
+  "revision_2": {
+    "weapon": {
+      "asset_id": "774610",
+      "source": "https://asset.seeles.ai/asset/export/7db8857e-2e4a-498d-b1dd-7d869ecc1dd0/774610/threeJs_6917978e-a062-4172-a7f4-015fdee192db.glb"
+    },
+    "hand_fix": "Neutral anatomical wrist pose on the non-Mixamo rig; authored local-axis right-hand grip, free left hand; rigid wrist skin for axe.",
+    "new_clips": {
+      "attack2": {
+        "tag": "Standing Melee Attack Backhand",
+        "source": "https://asset.seeles.ai/asset/export/2a7c971d-1258-4563-afa4-5a4791d33de8/1081139/source.fbx"
+      },
+      "heavy": {
+        "tag": "Standing Melee Attack Downward",
+        "source": "https://asset.seeles.ai/asset/export/ad0f7f83-522b-444a-b908-cd6a975b8e6b/1080146/source.fbx"
+      },
+      "counter": {
+        "tag": "Thrust Slash",
+        "source": "https://asset.seeles.ai/asset/export/2452c389-7bee-4685-9e8f-17d8658abc74/1081389/source.fbx"
+      },
+      "cleave": {
+        "tag": "One Hand Club Combo",
+        "source": "https://asset.seeles.ai/asset/export/5c122481-c8ec-4d74-8058-302ff5d3bd01/1081712/source.fbx"
+      },
+      "sweep": {
+        "tag": "One Hand Club Combo",
+        "source": "https://asset.seeles.ai/asset/export/5c122481-c8ec-4d74-8058-302ff5d3bd01/1081712/source.fbx"
+      },
+      "parry": {
+        "tag": "Sword And Shield Block",
+        "source": "https://asset.seeles.ai/asset/export/ebf6001a-6aa5-4b09-ad99-552a67ba1db3/1075367/source.fbx"
+      },
+      "stagger": {
+        "tag": "Standing React Large From Front",
+        "source": "https://asset.seeles.ai/asset/export/4d5f2e5d-92bc-4168-bc0c-b2d6d85797f5/1076562/source.fbx"
+      }
+    },
+    "video_capture": "An actual video_to_motion request was attempted; no completed artifact returned. Current runtime clips remain library-derived, trimmed and retargeted. A separate Seele Agent handoff package contains the request status and source video.",
+    "clip_report": [
+      {
+        "kind": "heroine",
+        "clips": [
+          {
+            "clip": "idle",
+            "source_frames": [
+              1,
+              111
+            ],
+            "duration": 3.6666666666666665,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "run",
+            "source_frames": [
+              1,
+              22
+            ],
+            "duration": 0.7,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "attack",
+            "source_frames": [
+              12,
+              50
+            ],
+            "duration": 1.2666666666666666,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "attack2",
+            "source_frames": [
+              20,
+              64
+            ],
+            "duration": 1.4666666666666666,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "heavy",
+            "source_frames": [
+              10,
+              52
+            ],
+            "duration": 1.4,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "counter",
+            "source_frames": [
+              20,
+              60
+            ],
+            "duration": 1.3333333333333333,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "cleave",
+            "source_frames": [
+              1,
+              36
+            ],
+            "duration": 1.1666666666666667,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "sweep",
+            "source_frames": [
+              37,
+              75
+            ],
+            "duration": 1.2666666666666666,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "parry",
+            "source_frames": [
+              1,
+              16
+            ],
+            "duration": 0.5,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "stagger",
+            "source_frames": [
+              1,
+              35
+            ],
+            "duration": 1.1333333333333333,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "dodge",
+            "source_frames": [
+              10,
+              33
+            ],
+            "duration": 0.7666666666666667,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "hurt",
+            "source_frames": [
+              8,
+              26
+            ],
+            "duration": 0.6,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "death",
+            "source_frames": [
+              1,
+              139
+            ],
+            "duration": 4.6,
+            "mapped_bones": 65,
+            "source_hold_frames": []
+          }
+        ],
+        "ground_offset": -0.018827052786946297,
+        "scale_factor": 0.9455103523094247,
+        "size": 1736884
+      },
+      {
+        "kind": "opponent",
+        "clips": [
+          {
+            "clip": "idle",
+            "source_frames": [
+              1,
+              111
+            ],
+            "duration": 3.6666666666666665,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "run",
+            "source_frames": [
+              1,
+              22
+            ],
+            "duration": 0.7,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "attack",
+            "source_frames": [
+              12,
+              50
+            ],
+            "duration": 1.2666666666666666,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "attack2",
+            "source_frames": [
+              20,
+              64
+            ],
+            "duration": 1.4666666666666666,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "heavy",
+            "source_frames": [
+              10,
+              52
+            ],
+            "duration": 1.4,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "counter",
+            "source_frames": [
+              20,
+              60
+            ],
+            "duration": 1.3333333333333333,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "cleave",
+            "source_frames": [
+              1,
+              36
+            ],
+            "duration": 1.1666666666666667,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "sweep",
+            "source_frames": [
+              37,
+              75
+            ],
+            "duration": 1.2666666666666666,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "parry",
+            "source_frames": [
+              1,
+              16
+            ],
+            "duration": 0.5,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "stagger",
+            "source_frames": [
+              1,
+              35
+            ],
+            "duration": 1.1333333333333333,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "dodge",
+            "source_frames": [
+              10,
+              33
+            ],
+            "duration": 0.7666666666666667,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "hurt",
+            "source_frames": [
+              8,
+              26
+            ],
+            "duration": 0.6,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          },
+          {
+            "clip": "death",
+            "source_frames": [
+              1,
+              139
+            ],
+            "duration": 4.6,
+            "mapped_bones": 51,
+            "source_hold_frames": []
+          }
+        ],
+        "ground_offset": 0.031699273735284805,
+        "scale_factor": 0.9427006837769097,
+        "size": 5447864
+      }
+    ]
+  }
 }

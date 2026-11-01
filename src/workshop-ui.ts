@@ -1,16 +1,16 @@
 import './workshop.css';
 
-type WorkshopState = { playerHealth: number; enemyHealth: number; maxPlayerHealth?: number; maxEnemyHealth?: number; won: boolean; lost: boolean; mode?: string; objective?: string; canEnterPortal?: boolean };
+type WorkshopState = { playerHealth: number; enemyHealth: number; maxPlayerHealth?: number; maxEnemyHealth?: number; won: boolean; lost: boolean; mode?: string; objective?: string; canEnterPortal?: boolean;combo?:number;counterReady?:boolean;feedback?:string };
 const copy = {
   title: ['世界工坊', 'World Workshop'], subtitle: ['山间试炼', 'Mountain trial'],
   enter: ['进入工坊', 'Enter workshop'], loading: ['正在准备工坊…', 'Preparing workshop…'], failed: ['工坊加载失败，刷新重试', 'Workshop unavailable. Reload to retry.'],
   observe: ['自由观察', 'Look around'], resume: ['继续试炼', 'Resume trial'], exit: ['返回主页', 'Back to website'],
   player: ['女侠', 'Wanderer'], enemy: ['守关者', 'Sentinel'], objective: ['击败守关者，唤醒世界入口。', 'Defeat the sentinel to awaken the world gate.'],
   observing: ['拖动环顾院落，滚轮调整距离。', 'Drag to orbit the courtyard. Scroll to zoom.'],
-  hint: ['W A S D 移动　J 攻击　空格 闪避　拖动观察', 'W A S D Move · J Attack · Space Dodge · Drag to look'],
+  hint: ['WASD 移动 · 左键 / J 连击 · 右键 / K 弹反 · 空格闪避 · 拖动观察', 'WASD Move · Left click / J Combo · Right click / K Parry · Space Dodge · Drag to look'],
   win: ['世界，为你开启。', 'A world opens for you.'], winBody: ['试炼完成。选择下一场探索，或留在工坊继续练习。', 'Trial complete. Choose your next world, or stay and practice.'],
   lose: ['再来一次。', 'One more try.'], loseBody: ['留意守关者的起手，闪避后寻找出剑的时机。', 'Watch the sentinel’s wind-up. Dodge, then find your opening.'],
-  library: ['进入游戏库', 'Explore the games'], retry: ['重新试炼', 'Try again'], attack: ['攻击', 'Attack'], dodge: ['闪避', 'Dodge'],
+  library: ['进入游戏库', 'Explore the games'], retry: ['重新试炼', 'Try again'], attack: ['连击', 'Combo'], dodge: ['闪避', 'Dodge'],parry:['弹反','Parry'],
   stay: ['留在工坊', 'Stay in the workshop'], portal: ['穿过光门', 'Enter the gate'], gateOpen: ['入口已开启，靠近光门按 E 进入游戏库。', 'The gate is open. Approach it and press E to explore the games.'],
   forward: ['向前移动', 'Move forward'], left: ['向左移动', 'Move left'], back: ['向后移动', 'Move backward'], right: ['向右移动', 'Move right'],
   caseTitle: ['下一站，由你选择。', 'Choose your next world.'], caseBody: ['同一座工坊，通往不同世界。', 'One workshop. Different worlds.'],
@@ -54,6 +54,8 @@ export function initWorkshopUI() {
     <p class="workshop-keyboard" data-wcopy="hint"></p>
     <div class="workshop-touch" id="workshop-touch"><div class="workshop-pad"><button type="button" class="up" data-wkey="w" data-wlabel="forward">↑</button><button type="button" class="left" data-wkey="a" data-wlabel="left">←</button><button type="button" class="down" data-wkey="s" data-wlabel="back">↓</button><button type="button" class="right" data-wkey="d" data-wlabel="right">→</button></div><div class="workshop-touch-actions"><button type="button" data-wkey="dodge" data-wcopy="dodge"></button><button type="button" data-wkey="attack" data-wcopy="attack"></button></div></div>`;
   document.body.append(hud);
+  const combatHint=document.createElement('p');combatHint.className='workshop-combat-hint';hud.append(combatHint);
+  const parryButton=document.createElement('button');parryButton.type='button';parryButton.dataset.wkey='parry';parryButton.dataset.wcopy='parry';hud.querySelector('.workshop-touch-actions')?.prepend(parryButton);
   const seatNotice = document.createElement('button');
   seatNotice.type = 'button'; seatNotice.className = 'workshop-seat-notice'; seatNotice.hidden = true;
   hud.append(seatNotice);
@@ -93,6 +95,7 @@ export function initWorkshopUI() {
   function render(state: WorkshopState) {
     if (!state.won && !state.lost) resultDismissed = false;
     last = state;
+    combatHint.textContent=state.feedback==='parry'?(english()?'PARRY · Attack now to counter':'震刀成功 · 立即攻击可反击'):state.feedback==='heavy'?(english()?'HEAVY HIT · Guard broken':'重击命中 · 击退破招'):state.counterReady?(english()?'COUNTER READY':'反击窗口已开启'):state.combo?(english()?`COMBO ${state.combo} / 3 · Finish with a heavy strike`:`连击 ${state.combo} / 3 · 末段重击`):(english()?'Light hits do not interrupt. Parry at impact, then counter.':'轻击不会打断敌人 · 迎击瞬间弹反，随后反击');
     const health = (prefix: 'player' | 'enemy', value: number, max: number) => {
       const safe = Math.max(0, Math.min(max, value));
       setText(`workshop-${prefix}-value`, String(Math.ceil(safe)));
