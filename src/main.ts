@@ -6,9 +6,8 @@ import { HAS_SERVICE, apiUrl, streamUrl, selectService } from './service';
 import { initLibrary, selectedGame, setLibrarySession } from './library';
 
 import { initI18n } from './i18n';
-import { initWorkshopUI } from './workshop-ui';
+import { initDeliveredWorkshop } from './delivered-workshop';
 initI18n();
-initWorkshopUI();
 
 type SessionState = { id: string; state: string; position: number; waiting: number; reason: string; game_id?: string;
   offer_remaining: number; lease_remaining: number | null; heartbeat_timeout: number };
@@ -327,7 +326,5 @@ void initLibrary();
 void initCommunity();
 }
 initMotion();
-void import('./world-scene').then(({ initWorldScene }) => initWorldScene()).catch(() => {
-  window.dispatchEvent(new CustomEvent('workshop:ready', { detail: { ready: false, error: '世界素材加载失败，请刷新重试。' } }));
-});
+void initDeliveredWorkshop();
 void initializeServices();

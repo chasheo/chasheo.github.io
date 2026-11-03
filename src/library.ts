@@ -13,6 +13,18 @@ const library = document.getElementById('game-library')!;
 const feedback = document.getElementById('library-feedback')!;
 
 export function selectedGame() { return chosen; }
+export function selectGameById(id: string) {
+  const game = games.find(item => item.id === id);
+  if (!game || (locked && id !== chosen)) return false;
+  chosen = id; updateStage(game); render(); return true;
+}
+function publishGames() {
+  window.dispatchEvent(new CustomEvent('chasheo:games', { detail: games.map(g => ({
+    id: g.id, title: g.title, description: g.description,
+    cover: new URL(g.image || g.images?.[0]?.url || fallback.image!, location.origin).href,
+    availability: 'playable'
+  })) }));
+}
 
 function updateStage(game: Game) {
   const title = document.getElementById('stage-game-title')!;
@@ -94,7 +106,7 @@ export function setLibrarySession(active: boolean, gameId?: string) {
 }
 
 export async function initLibrary() {
-  render();
+  render(); publishGames();
   if (!HAS_SERVICE) { feedback.textContent = '世界服务离线，暂时展示本地预览。'; return; }
   try {
     const result = await request('games') as { games: Game[] };
@@ -102,6 +114,6 @@ export async function initLibrary() {
     games = result.games;
     if (activeGameId && games.some(g => g.id === activeGameId)) chosen = activeGameId;
     if (!games.some(g => g.id === chosen)) chosen = games[0].id;
-    updateStage(games.find(g => g.id === chosen)!); render();
+    updateStage(games.find(g => g.id === chosen)!); render(); publishGames();
   } catch { feedback.textContent = '世界目录暂时无法连接，显示已保存的预览。'; }
 }

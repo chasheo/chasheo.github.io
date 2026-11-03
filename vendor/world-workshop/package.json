@@ -1,0 +1,28 @@
+{
+  "name": "chasheo-world-workshop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "世界工坊 / World Workshop — embeddable Three.js ARPG world module for chasheo.github.io",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build && vite build --config vite.lib.config.ts",
+    "build:app": "vite build",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.1.1",
+    "@gltf-transform/core": "^4.1.1",
+    "@gltf-transform/extensions": "^4.1.1",
+    "@gltf-transform/functions": "^4.1.1",
+    "@types/three": "0.170.0",
+    "draco3dgltf": "^1.5.7",
+    "typescript": "5.6.3",
+    "vite": "5.4.11"
+  }
+}
