@@ -2,7 +2,7 @@ name: Deploy homepage to GitHub Pages
 
 on:
   push:
-    branches: [codex/local-streaming-demo]
+    branches: [main, codex/local-streaming-demo]
   workflow_dispatch:
 
 permissions:

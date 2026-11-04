@@ -1,7 +1,7 @@
 # 世界工坊 · World Workshop
 
 [![Website](https://img.shields.io/badge/Play-chasheo.github.io-007ec6)](https://chasheo.github.io/)
-[![Deploy](https://github.com/chasheo/chasheo.github.io/actions/workflows/pages.yml/badge.svg?branch=codex%2Flocal-streaming-demo)](https://github.com/chasheo/chasheo.github.io/actions/workflows/pages.yml)
+[![Deploy](https://github.com/chasheo/chasheo.github.io/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/chasheo/chasheo.github.io/actions/workflows/pages.yml)
 [![Three.js](https://img.shields.io/badge/3D-Three.js-black?logo=threedotjs)](https://threejs.org/)
 [![Unreal Engine](https://img.shields.io/badge/Streaming-Unreal_Engine-313131?logo=unrealengine)](https://www.unrealengine.com/)
 
@@ -39,7 +39,7 @@ npm run build
 
 GitHub Pages 托管前端；Windows GPU 主机运行游戏与服务，经 Cloudflare 固定入口提供 API 和信令，游戏画面通过 WebRTC 传输。主机离线时游戏与社区服务不可用，静态主页仍可浏览；公网连通性取决于访客网络与 ICE/TURN 配置。
 
-当前发布分支为 `codex/local-streaming-demo`，通过 [PR #1](https://github.com/chasheo/chasheo.github.io/pull/1) 审核进入 `main`。
+`main` 为主分支；`main` 和当前开发分支 `codex/local-streaming-demo` 的推送都会发布到同一个 GitHub Pages 网站。
 
 ## 素材与授权
 

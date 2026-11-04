@@ -73,6 +73,6 @@ npm run build
 
 ## 发布
 
-`.github/workflows/pages.yml` 当前由 `codex/local-streaming-demo` 推送触发，构建 `dist/` 并发布 GitHub Pages。源码通过现有 PR 审核合入 `main`。不上传 `.local.json`、环境变量文件、凭证、数据库、游戏 exe 或 `dist/`。
+`.github/workflows/pages.yml` 由 `main` 或 `codex/local-streaming-demo` 推送触发，构建 `dist/` 并发布到同一个 GitHub Pages 网站。源码通过 PR 审核合入 `main`。不上传 `.local.json`、环境变量文件、凭证、数据库、游戏 exe 或 `dist/`。
 
 网关源码在 `edge/`，部署使用个人账户的本地 Wrangler 配置；不将账户凭证写入文档或提交。免费临时 Tunnel 会变更地址，现有固定入口不依赖临时 Tunnel。
