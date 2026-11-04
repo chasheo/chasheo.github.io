@@ -30,6 +30,7 @@ const translations: Record<string, string> = {
   '正在启动世界':'Starting world','沉浸游玩':'Play now','正在连接画面':'Connecting to stream','领取入场券':'Join the queue','重新连接服务':'Reconnect',
   '席位空闲 · 可以入场':'Seat available','一位访客正在探索':'A visitor is exploring','世界暂时无法连接':'Service unavailable',
   '已选择':'Selected','选择这个世界':'Choose world','下载游戏':'Download','下载准备中':'Download coming soon','推流接入中':'Streaming coming soon',
+  '游戏截图 / 入场后切换为实机画面':'Game screenshot / live game appears after entry',
   '世界暂时离线，请稍后重试':'World is offline. Please try again later.',
   '世界服务暂时离线，请稍后重试。':'World service is offline. Please try again later.',
   '世界目录暂时无法连接，显示已保存的预览。':'World catalog unavailable. Showing the saved preview.',

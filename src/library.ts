@@ -38,6 +38,9 @@ function updateStage(game: Game) {
   const image = document.getElementById('stage-poster') as HTMLImageElement;
   image.src = game.image || game.images?.[0]?.url || fallback.image!;
   image.alt = `${game.title} 游戏视觉`;
+  const disclosure = document.querySelector<HTMLElement>('.poster-disclosure');
+  if (disclosure) disclosure.textContent = game.id === 'neon-embers'
+    ? '游戏截图 / 入场后切换为实机画面' : '概念视觉 / 入场后切换为实机画面';
 }
 
 function render() {
