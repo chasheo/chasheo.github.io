@@ -1,0 +1,6 @@
+{
+  "name": "chasheo-home-relay",
+  "pages_build_output_dir": "./pages-relay-output",
+  "compatibility_date": "2026-10-01",
+  "services": [ { "binding": "GAME_GATEWAY", "service": "chasheo-home-gateway" } ]
+}

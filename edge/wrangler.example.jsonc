@@ -1,0 +1,15 @@
+{
+  "name": "chasheo-home-gateway",
+  "account_id": "REPLACE_WITH_PERSONAL_ACCOUNT_ID",
+  "main": "gateway.mjs",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "vpc_services": [
+    {
+      "binding": "GAME_HOST",
+      "service_id": "REPLACE_WITH_PERSONAL_VPC_SERVICE_ID",
+      "remote": true
+    }
+  ]
+}

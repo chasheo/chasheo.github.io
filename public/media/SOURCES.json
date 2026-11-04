@@ -1,0 +1,64 @@
+{
+  "forest-portal.png": {
+    "purpose": "Website world-concept hero and pre-play poster. Not a screenshot of Mystic Forest.",
+    "created_with": "Built-in image_gen tool",
+    "prompt": "Create a photorealistic cinematic environment key art, a website hero background for a full-stack Unreal Engine game creator's personal world laboratory. 16:9 very wide landscape composition. A mysterious overgrown subtropical forest at blue hour, ancient mossy stone ring arch to the right of center, a subtle warm amber vertical light portal within the arch, shallow reflecting water and ferns in foreground, towering tree silhouettes and layered soft volumetric mist, tiny warm firefly lights, distant grey-green mountain ridge. Rich tactile realistic vegetation and wet stone, exquisite cinematic environmental art, cool deep petrol / charcoal green shadows, muted silver-blue mist, warm ivory-amber highlights. Realistic physically based rendering, restrained filmic contrast, no oversaturation. Strong clear focus on the arch in right half; left 45 percent is dark but richly atmospheric forest with large open negative space for live HTML typography. Horizon and key subject in middle 60 percent so responsive crops work. No people, no game character, no machinery, no visible symbols or writing, no lettering, no typography, no UI, no logo, no watermark. This is explicitly a world-concept background asset, not a screenshot of an existing game. Original environment with editorial composition, striking and refined, no generic neon cyberpunk."
+  },
+  "motion": {
+    "library": "GSAP 3.15.0 + ScrollTrigger",
+    "source": "https://gsap.com/docs/v3/Plugins/ScrollTrigger/",
+    "reference_comparison": [
+      "https://motion.dev/docs/scroll",
+      "https://lenis.dev/"
+    ],
+    "implementation": "Title reveals, scroll parallax, section entrances, counter transitions and small pointer responses. Native scrolling; game input is not intercepted. Reduced-motion support; ambient particles pause during gameplay."
+  },
+  "pine-web.glb": {
+    "source": "https://polyhaven.com/a/pine_sapling_small",
+    "author": "Poly Haven",
+    "license": "CC0 1.0",
+    "purpose": "Real 3D foreground foliage for the cinematic background",
+    "processing": "Downloaded 1k glTF and textures with checksums, decimated meshes to 24% in Blender, exported GLB."
+  },
+  "mystic-forest-browser.png": {
+    "purpose": "An actual browser screenshot of Mystic Forest gameplay within an older version of this homepage.",
+    "source": "Owner-provided MysticForest Windows package, local browser validation",
+    "disclosure": "Actual browser screenshot; not a full-resolution standalone game screenshot."
+  },
+  "mountain-world.glb": {
+    "purpose": "Real-time 3D mountain courtyard scene and animations",
+    "source": "Blender scene assembled using Seele asset library and Poly Haven textures",
+    "assets": "Seele 224184, 662537, 1048237, 691062, 664289, 1026089, 689149, 600746, 259582, 1096815, 920085",
+    "license": "Public redistribution rights for Seele assets have not yet been verified",
+    "processing": "Exported from local Blender scene to glTF with Draco compression"
+  },
+  "material_revision_2": {
+    "changes": [
+      "Two-metre ground UVs; 2K diffuse, roughness and normal maps",
+      "Metre-scaled wood/plaster UVs, bevelled architecture edges, textured stone threshold",
+      "Removed unused cinematic performers from environment export"
+    ],
+    "materials": [
+      {
+        "name": "brown_mud_leaves_01",
+        "source": "https://polyhaven.com/a/brown_mud_leaves_01",
+        "license": "CC0"
+      },
+      {
+        "name": "weathered_brown_planks",
+        "source": "https://polyhaven.com/a/weathered_brown_planks",
+        "license": "CC0"
+      },
+      {
+        "name": "rough_plaster_03",
+        "source": "https://polyhaven.com/a/rough_plaster_03",
+        "license": "CC0"
+      },
+      {
+        "name": "mossy_stone_wall",
+        "source": "https://polyhaven.com/a/mossy_stone_wall",
+        "license": "CC0"
+      }
+    ]
+  }
+}

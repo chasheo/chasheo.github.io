@@ -5,3 +5,7 @@ dist/
 __pycache__/
 .pytest_cache/
 *.pyc
+*.private.json
+*.key
+.wrangler/
+edge/wrangler.local.jsonc
