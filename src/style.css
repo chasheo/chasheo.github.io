@@ -125,6 +125,3 @@ a,button{transition:color .25s ease,background-color .25s ease,border-color .25s
 .guestbook-intro{background:linear-gradient(90deg,rgba(8,18,14,.74),rgba(8,18,14,0));padding:24px 24px 24px 0}
 @media(max-width:760px){.play-footnote{font-size:14px}.guestbook-intro{padding:20px 0}}
 body .controls-hint,body .controls-hint>.tiny-label,body .poster-disclosure,body .game-card-badge,body .game-card-caption,body .comment-meta time,body .name-field small{font-size:14px}body .controls-hint kbd{font-size:12px}
-.neon-cover-title{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(16px,2vw,28px);pointer-events:none;background:linear-gradient(90deg,#050b19c9,transparent 88%);text-shadow:0 2px 14px #050713}
-.neon-cover-title span,.neon-cover-title small{color:#8ff6ff;font:600 12px/1.4 system-ui,sans-serif;letter-spacing:.18em}
-.neon-cover-title strong{color:#fff;font-size:clamp(26px,2.5vw,36px);white-space:nowrap;line-height:1.2;margin:8px 0 4px;letter-spacing:.05em;text-shadow:2px 2px 0 #d43c70,-2px -1px 0 #00cedb,0 3px 16px #020610}

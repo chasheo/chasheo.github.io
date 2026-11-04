@@ -56,12 +56,6 @@ function render() {
     const caption = document.createElement('span'); caption.className = 'game-card-caption';
     caption.textContent = game.image_label || '游戏视觉';
     visual.append(img, badge, caption);
-    let coverTitle: HTMLElement | undefined;
-    if (game.id === 'neon-embers') {
-      coverTitle = document.createElement('div'); coverTitle.className = 'neon-cover-title';
-      coverTitle.innerHTML = '<span>NEW HARBOR CITY</span><strong>霓虹余烬</strong><small>NEON EMBERS</small>';
-      visual.append(coverTitle);
-    }
     const content = document.createElement('div'); content.className = 'game-card-content';
     const title = document.createElement('h4'); title.textContent = game.title;
     const description = document.createElement('p'); description.textContent = game.description;
@@ -97,7 +91,6 @@ function render() {
         const picture = document.createElement('img'); picture.src = item.url; picture.alt = ''; picture.loading = 'lazy';
         thumb.append(picture); thumb.addEventListener('click', () => {
           img.src = item.url; img.alt = item.label; caption.textContent = item.label;
-          if (coverTitle) coverTitle.hidden = item.url !== game.image;
           img.classList.toggle('browser-capture', item.url.endsWith('/mystic-forest-browser.png'));
         }); media.append(thumb);
       });
