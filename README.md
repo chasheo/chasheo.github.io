@@ -1,4 +1,6 @@
-# 世界工坊 · World Workshop
+<h1 align="center">游戏工坊</h1>
+
+<p align="center">简体中文 · <a href="README.en.md">English</a></p>
 
 [![Website](https://img.shields.io/badge/Play-chasheo.github.io-007ec6)](https://chasheo.github.io/)
 [![Deploy](https://github.com/chasheo/chasheo.github.io/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/chasheo/chasheo.github.io/actions/workflows/pages.yml)
@@ -12,7 +14,7 @@
 ## 可以体验什么
 
 - **三维工坊**：浏览背景、地点引导与自由观察、第三人称移动和战斗，支持中英文与触屏操作。
-- **两个 Unreal 游戏**：Mystic Forest 森林探索、霓虹余烬（Neon Embers）雨夜城市战斗；支持实机截图预览、全屏和声音切换。
+- **两个 Unreal 游戏**：魔法森林探索、霓虹余烬雨夜城市战斗；支持实机截图预览、全屏和声音切换。
 - **共享单席位**：访客免注册排队，轮到后选择游戏；当前玩家连续 120 秒没有心跳，关闭该局并放行下一位。
 - **真实社区数据**：游戏点赞、留言、访问量与成功游玩次数，由本机 SQLite 持久保存。
 
@@ -31,8 +33,8 @@ npm run build
 
 | 目录 | 内容 |
 | --- | --- |
-| `src/`、`public/` | 主页、世界集成与展示素材 |
-| `vendor/world-workshop/` | 可编辑三维世界源码与素材、动作来源说明 |
+| `src/`、`public/` | 主页、游戏工坊集成与展示素材 |
+| `vendor/world-workshop/` | 可编辑三维工坊源码与素材、动作来源说明 |
 | `server/` | 排队、Windows 游戏进程管理、Pixel Streaming 信令与社区接口 |
 | `edge/` | Cloudflare 公网 API / WebSocket 网关 |
 | `tests/` | 会话隔离、进程回收、社区与网关验证 |

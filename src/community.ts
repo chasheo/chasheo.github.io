@@ -38,7 +38,7 @@ export async function request(path: string, method = 'GET', body?: object, retry
     visitorToken = ''; localStorage.removeItem('chasheo-visitor-token');
     return request(path, method, body, false);
   }
-  if (!response.ok) throw new Error(result.error || '暂时无法连接世界记录，请稍后重试。');
+  if (!response.ok) throw new Error(result.error || '暂时无法连接游戏记录，请稍后重试。');
   return result;
 }
 
@@ -86,7 +86,7 @@ function renderComment(comment: Comment) {
   return article;
 }
 
-function empty(text = '第一条足迹，留给你。\n这个世界正在等一个新声音。') {
+function empty(text = '第一条足迹，留给你。\n这个游戏正在等一个新声音。') {
   const message = document.createElement('p'); message.className = 'empty-comments'; message.style.whiteSpace = 'pre-line';
   text.split('\n').forEach((line, index) => { if (index) message.append(document.createElement('br')); message.append(document.createTextNode(line)); });
   $('comments-list').replaceChildren(message);
@@ -112,10 +112,10 @@ export async function initCommunity() {
   const submit = $<HTMLButtonElement>('comment-submit');
   if (!HAS_SERVICE) {
     name.disabled = true; body.disabled = true; submit.disabled = true;
-    body.placeholder = '公开留言将在世界服务接入后开放。';
+    body.placeholder = '公开留言将在游戏服务接入后开放。';
     submit.textContent = '留言服务待接入';
     $('refresh-comments').setAttribute('disabled', '');
-    $('stats-note').textContent = '实时统计将在世界服务接入后显示';
+    $('stats-note').textContent = '实时统计将在游戏服务接入后显示';
     feedback('留言功能将在服务接入后开放。');
     empty('这里将记录每位探索者的足迹。\n留言服务正在准备中。');
     return;
@@ -127,7 +127,7 @@ export async function initCommunity() {
   });
   $('comment-form').addEventListener('submit', async event => {
     event.preventDefault(); if (submitting || !body.value.trim()) return;
-    submitting = true; submit.disabled = true; feedback('正在把足迹留在这个世界…');
+    submitting = true; submit.disabled = true; feedback('正在把足迹留在这个游戏…');
     try {
       const result = await request('comments', 'POST', { name: name.value, body: body.value,
         website: ($<HTMLFormElement>('comment-form').elements.namedItem('website') as HTMLInputElement).value });

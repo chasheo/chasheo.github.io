@@ -58,6 +58,16 @@ function render() {
   games.forEach(game => {
     const card = document.createElement('article');
     card.className = 'game-card' + (game.id === chosen ? ' selected' : '');
+    const selectable = !locked && !game.showcase;
+    card.setAttribute('role', 'group');
+    card.setAttribute('aria-label', `${gameName(game)} · ${currentLanguage() === 'en' ? (game.id === chosen ? 'Selected' : 'Press Enter to select') : (game.id === chosen ? '已选择' : '按回车选择')}`);
+    if (game.id === chosen) card.setAttribute('aria-current', 'true');
+    if (selectable) card.tabIndex = 0;
+    else card.classList.add('selection-locked');
+    const select = () => { if (selectable && game.id !== chosen && selectGameById(game.id)) document.querySelector<HTMLElement>(`.game-card[data-game-id="${game.id}"]`)?.focus({ preventScroll: true }); };
+    card.dataset.gameId = game.id;
+    card.addEventListener('click', event => { if (!(event.target as Element).closest('button,a,video,input')) select(); });
+    card.addEventListener('keydown', event => { if (event.target === card && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); select(); } });
     const visual = document.createElement('div'); visual.className = 'game-card-visual';
     const img = document.createElement('img'); img.loading = 'lazy';
     img.src = game.image || game.images?.[0]?.url || fallback.image!; img.alt = `${gameName(game)} · ${localize('游戏视觉')}`;
@@ -68,10 +78,6 @@ function render() {
     const title = document.createElement('h4'); title.textContent = gameName(game);
     const description = document.createElement('p'); description.textContent = localize(game.description);
     const actions = document.createElement('div'); actions.className = 'game-card-actions';
-    const choose = document.createElement('button'); choose.className = 'game-select';
-    choose.textContent = game.showcase ? '推流接入中' : game.id === chosen ? '已选择 ✓' : '选择这个世界 ↗';
-    choose.disabled = locked || Boolean(game.showcase); choose.setAttribute('aria-pressed', String(game.id === chosen));
-    choose.addEventListener('click', () => { chosen = game.id; updateStage(game); render(); });
     const like = document.createElement('button'); like.className = 'game-like';
     like.disabled = !HAS_SERVICE || typeof game.likes !== 'number';
     like.textContent = `${game.liked ? '♥' : '♡'} ${typeof game.likes === 'number' ? game.likes : '—'}`;
@@ -88,7 +94,8 @@ function render() {
     if (download instanceof HTMLAnchorElement && game.download_url) {
       download.href = game.download_url; download.target = '_blank'; download.rel = 'noopener noreferrer';
     }
-    actions.append(choose, like, download);
+    if (game.showcase) { const note = document.createElement('span'); note.className = 'game-availability'; note.textContent = localize('推流接入中'); actions.append(note); }
+    actions.append(like, download);
     content.append(title, description);
     if (gameTags[game.id]) {
       const tags = document.createElement('ul'); tags.className = 'game-tags';
@@ -133,7 +140,7 @@ export async function initLibrary() {
   window.addEventListener('chasheo:language', () => { render(); const game = games.find(g => g.id === chosen); if (game) updateStage(game); });
   updateStage(games[0]);
   render(); publishGames();
-  if (!HAS_SERVICE) { feedback.textContent = '世界服务离线，暂时展示本地预览。'; return; }
+  if (!HAS_SERVICE) { feedback.textContent = '游戏服务离线，暂时展示本地预览。'; return; }
   try {
     const result = await request('games') as { games: Game[] };
     if (!Array.isArray(result.games) || !result.games.length) throw new Error('empty');
@@ -141,5 +148,5 @@ export async function initLibrary() {
     if (activeGameId && games.some(g => g.id === activeGameId)) chosen = activeGameId;
     if (!games.some(g => g.id === chosen)) chosen = games[0].id;
     updateStage(games.find(g => g.id === chosen)!); render(); publishGames();
-  } catch { feedback.textContent = '世界目录暂时无法连接，显示已保存的预览。'; }
+  } catch { feedback.textContent = '游戏目录暂时无法连接，显示已保存的预览。'; }
 }

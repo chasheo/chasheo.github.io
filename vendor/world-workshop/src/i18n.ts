@@ -1,8 +1,8 @@
 import type { Language, LocalizedText } from './types';
 
 const STR = {
-  title: { zh: '世界工坊', en: 'World Workshop' },
-  subtitle: { zh: 'chasheo 的三维主世界 · 通往不同游戏的工坊', en: "chasheo's 3D home world · a workshop that leads to many games" },
+  title: { zh: '游戏工坊', en: 'Game Workshop' },
+  subtitle: { zh: 'chasheo 的三维游戏工坊 · 通往不同游戏的工坊', en: "chasheo's 3D game workshop · a workshop that leads to many games" },
   takeover: { zh: '接管角色', en: 'Take control' },
   backHome: { zh: '返回主页', en: 'Back to homepage' },
   loading: { zh: '载入中', en: 'Loading' },
@@ -39,7 +39,7 @@ const STR = {
   rematchPrompt: { zh: '守关者倒地未起 · 按 E 让他再战（光门保持开启）', en: 'The gatekeeper is down · press E to fight him again (the gate stays open)' },
   sectionArrival: { zh: '山径 · 抵达', en: 'Mountain path · Arrival' },
   sectionCourtyard: { zh: '楼下院落', en: 'Courtyard below the houses' },
-  sectionWorlds: { zh: '世界之门', en: 'Gate of Worlds' },
+  sectionWorlds: { zh: '游戏之门', en: 'Game Portal' },
   dragHint: { zh: '拖动观察 · 滚轮缩放', en: 'Drag to look · Scroll to zoom' },
   controlsPC: {
     zh: 'WASD 移动 · 鼠标 转视角 · 左键 五段连击(第五段蓄力跃斩) · 右键 弹反 · Shift 短按闪避/长按冲刺 · 空格 跳跃 · E 交互 · Esc 返回',

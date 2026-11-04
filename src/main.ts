@@ -33,7 +33,7 @@ Logger.InitLogging(LogLevel.Warning, false);
 
 async function api(path: string, method = 'POST', body?: object) {
   const response = await fetch(apiUrl(path), { method, headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(8000) });
-  if (!response.headers.get('Content-Type')?.includes('application/json')) throw new Error('世界服务暂时离线，请稍后重试。');
+  if (!response.headers.get('Content-Type')?.includes('application/json')) throw new Error('游戏服务暂时离线，请稍后重试。');
   const result = await response.json();
   if (!response.ok) {
     if ((path === 'session' || path === 'heartbeat') && [401, 409].includes(response.status)) {
@@ -77,20 +77,20 @@ function render() {
     el('number-label').textContent = '席位已就绪';
     el('queue-number').textContent = '01';
     el('queue-detail').textContent = `请在 ${s.offer_remaining} 秒内确认入场`;
-    el('session-message').textContent = lastError || '轮到你了。选择世界后确认启动。';
+    el('session-message').textContent = lastError || '轮到你了。选择游戏后确认启动。';
     button('启动所选游戏');
   } else if (active) {
     el('number-label').textContent = '本次游玩';
     el('queue-number').textContent = '01';
-    el('queue-detail').textContent = s.state === 'starting' ? '世界正在启动' : '席位由你独享';
-    el('session-message').textContent = lastError || (s.state === 'starting' ? '正在唤醒世界与连接画面，请稍候。' : hasFrames ? '画面已连接。点击画面，开始探索。' : '正在连接实时画面。');
-    button(s.state === 'starting' ? '正在启动世界' : hasFrames ? '沉浸游玩' : '正在连接画面', !hasFrames);
+    el('queue-detail').textContent = s.state === 'starting' ? '游戏正在启动' : '席位由你独享';
+    el('session-message').textContent = lastError || (s.state === 'starting' ? '正在唤醒游戏与连接画面，请稍候。' : hasFrames ? '画面已连接。点击画面，开始探索。' : '正在连接实时画面。');
+    button(s.state === 'starting' ? '正在启动游戏' : hasFrames ? '沉浸游玩' : '正在连接画面', !hasFrames);
   } else {
     el('number-label').textContent = '空闲席位';
-    el('session-message').textContent = lastError || s?.reason || '准备好开启一小段探索了吗？';
+    el('session-message').textContent = lastError || s?.reason || '';
     button(online ? '领取入场券' : '重新连接服务');
   }
-  el('stage-message').textContent = active ? (hasFrames ? '' : s?.state === 'starting' ? '正在唤醒世界，请稍候…' : '正在建立实时连接…') : '选择世界，等你入场。';
+  el('stage-message').textContent = active ? (hasFrames ? '' : s?.state === 'starting' ? '正在唤醒游戏，请稍候…' : '正在建立实时连接…') : '选择游戏，等你入场。';
   el('live-label').textContent = hasFrames ? '正在游玩' : active ? '正在建立连接' : '等待入场';
 }
 
@@ -171,7 +171,7 @@ async function poll(heartbeat = false) {
   try {
     const health = await api('health', 'GET');
     online = health.ok;
-    el('seat-state').textContent = !health.ok ? '世界暂时无法连接' : health.busy ? '一位访客正在探索' : '席位空闲 · 可以入场';
+    el('seat-state').textContent = !health.ok ? '游戏暂时无法连接' : health.busy ? '一位访客正在探索' : '席位空闲 · 可以入场';
     el('seat-dot').className = `status-dot ${!health.ok ? 'offline' : health.busy ? 'busy' : ''}`;
     if (!current || current.state === 'ended') {
       el('queue-number').textContent = health.busy ? '00' : '01';
@@ -189,7 +189,7 @@ async function poll(heartbeat = false) {
       lastError = ''; render(); return;
     }
     online = false;
-    el('seat-state').textContent = '世界暂时离线，请稍后重试';
+    el('seat-state').textContent = '游戏暂时离线，请稍后重试';
     el('seat-dot').className = 'status-dot offline';
     lastError = userError(error, '连接失败，请重试。');
     render();
@@ -315,10 +315,10 @@ if (HAS_SERVICE) {
 } else {
   el('seat-state').textContent = '游戏服务尚未接入';
   el('seat-dot').className = 'status-dot offline';
-  el('number-label').textContent = '世界预览';
+  el('number-label').textContent = '游戏预览';
   el('queue-number').textContent = '—';
   el('queue-detail').textContent = '实机体验稍后开放';
-  el('session-message').textContent = '当前可以浏览世界。游戏服务接入后，即可在这里排队入场。';
+  el('session-message').textContent = '当前可以浏览游戏。游戏服务接入后，即可在这里排队入场。';
   el('stage-message').textContent = '实机体验将在游戏服务接入后开放。';
   button('游戏服务待接入', true);
 }

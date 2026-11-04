@@ -24910,7 +24910,7 @@ function Jv(r, t) {
     return T.repeat.set(0.16, 0.16), T.needsUpdate = !0, T;
   }, x = new Me({ color: 9146516, map: y("color"), normalMap: y("normal"), roughnessMap: y("roughness"), roughness: 1, metalness: 0.02, envMapIntensity: 0.9 });
   x.normalScale.setScalar(0.8);
-  const _ = Fv(), L = new Me({ map: _, alphaTest: 0.5, color: 9071186, roughness: 0.8, side: 2 }), R = new Me({ color: 15326658, roughness: 1, emissive: new ft(1, 0.72, 0.42), emissiveIntensity: 0, transparent: !0, opacity: 0.86, side: 2 }), C = Nv("世界工坊", "WORLD  WORKSHOP  ·  chasheo"), A = new Me({ map: C, roughness: 0.5, metalness: 0.2 }), M = new Me({ color: 12075054, roughness: 0.7, emissive: new ft(1, 0.45, 0.2), emissiveIntensity: 0.6, transparent: !0, opacity: 0.95 }), w = new Me({ color: 11570519, metalness: 1, roughness: 0.32 }), I = { timber: d, timberDark: f, plaster: g, stone: v, tile: x, lattice: L, paper: R, plaque: A, floor: m, lantern: M, brick: p };
+  const _ = Fv(), L = new Me({ map: _, alphaTest: 0.5, color: 9071186, roughness: 0.8, side: 2 }), R = new Me({ color: 15326658, roughness: 1, emissive: new ft(1, 0.72, 0.42), emissiveIntensity: 0, transparent: !0, opacity: 0.86, side: 2 }), C = Nv("游戏工坊", "GAME  WORKSHOP  ·  chasheo"), A = new Me({ map: C, roughness: 0.5, metalness: 0.2 }), M = new Me({ color: 12075054, roughness: 0.7, emissive: new ft(1, 0.45, 0.2), emissiveIntensity: 0.6, transparent: !0, opacity: 0.95 }), w = new Me({ color: 11570519, metalness: 1, roughness: 0.32 }), I = { timber: d, timberDark: f, plaster: g, stone: v, tile: x, lattice: L, paper: R, plaque: A, floor: m, lantern: M, brick: p };
   i.push(d, f, g, v, m, x, L, R, A, M, w, _, C, p);
   const k = [], F = [], U = [], H = r.models, O = [];
   for (const j of $s) {
@@ -25077,8 +25077,8 @@ function Jv(r, t) {
   };
 }
 const Qv = {
-  title: { zh: "世界工坊", en: "World Workshop" },
-  subtitle: { zh: "chasheo 的三维主世界 · 通往不同游戏的工坊", en: "chasheo's 3D home world · a workshop that leads to many games" },
+  title: { zh: "游戏工坊", en: "Game Workshop" },
+  subtitle: { zh: "chasheo 的三维游戏工坊 · 通往不同游戏的工坊", en: "chasheo's 3D game workshop · a workshop that leads to many games" },
   takeover: { zh: "接管角色", en: "Take control" },
   backHome: { zh: "返回主页", en: "Back to homepage" },
   loading: { zh: "载入中", en: "Loading" },
@@ -25115,7 +25115,7 @@ const Qv = {
   rematchPrompt: { zh: "守关者倒地未起 · 按 E 让他再战（光门保持开启）", en: "The gatekeeper is down · press E to fight him again (the gate stays open)" },
   sectionArrival: { zh: "山径 · 抵达", en: "Mountain path · Arrival" },
   sectionCourtyard: { zh: "楼下院落", en: "Courtyard below the houses" },
-  sectionWorlds: { zh: "世界之门", en: "Gate of Worlds" },
+  sectionWorlds: { zh: "游戏之门", en: "Game Portal" },
   dragHint: { zh: "拖动观察 · 滚轮缩放", en: "Drag to look · Scroll to zoom" },
   controlsPC: {
     zh: "WASD 移动 · 鼠标 转视角 · 左键 五段连击(第五段蓄力跃斩) · 右键 弹反 · Shift 短按闪避/长按冲刺 · 空格 跳跃 · E 交互 · Esc 返回",

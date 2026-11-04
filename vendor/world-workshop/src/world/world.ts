@@ -157,7 +157,7 @@ export function buildWorld(a: Assets, quality: 'high' | 'low'): WorldBuild {
   const latTex = latticeTexture();
   const lattice = new THREE.MeshStandardMaterial({ map: latTex, alphaTest: 0.5, color: 0x8a6a52, roughness: 0.8, side: THREE.DoubleSide });
   const paper = new THREE.MeshStandardMaterial({ color: 0xe9ddc2, roughness: 1, emissive: new THREE.Color(1.0, 0.72, 0.42), emissiveIntensity: 0.0, transparent: true, opacity: 0.86, side: THREE.DoubleSide });
-  const plaqueTex = plaqueTexture('世界工坊', 'WORLD  WORKSHOP  ·  chasheo');
+  const plaqueTex = plaqueTexture('游戏工坊', 'GAME  WORKSHOP  ·  chasheo');
   const plaque = new THREE.MeshStandardMaterial({ map: plaqueTex, roughness: 0.5, metalness: 0.2 });
   const lantern = new THREE.MeshStandardMaterial({ color: 0xb8402e, roughness: 0.7, emissive: new THREE.Color(1.0, 0.45, 0.2), emissiveIntensity: 0.6, transparent: true, opacity: 0.95 });
   const brass = new THREE.MeshStandardMaterial({ color: 0xb08d57, metalness: 1, roughness: 0.32 });
