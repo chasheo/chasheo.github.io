@@ -1,3 +1,4 @@
+import { userError } from './i18n';
 import gsap from 'gsap';
 import { HAS_SERVICE, apiUrl } from './service';
 
@@ -77,7 +78,7 @@ function renderComment(comment: Comment) {
     remove.addEventListener('click', async () => {
       remove.disabled = true;
       try { updateStats(await request(`comments/${comment.id}`, 'DELETE')); article.remove(); if (!$('comments-list').childElementCount) empty(); }
-      catch (error) { feedback(error instanceof Error ? error.message : '收回失败，请重试。', true); remove.disabled = false; }
+      catch (error) { feedback(userError(error, '收回失败，请重试。'), true); remove.disabled = false; }
     });
     content.append(remove);
   }
@@ -87,7 +88,8 @@ function renderComment(comment: Comment) {
 
 function empty(text = '第一条足迹，留给你。\n这个世界正在等一个新声音。') {
   const message = document.createElement('p'); message.className = 'empty-comments'; message.style.whiteSpace = 'pre-line';
-  message.textContent = text; $('comments-list').replaceChildren(message);
+  text.split('\n').forEach((line, index) => { if (index) message.append(document.createElement('br')); message.append(document.createTextNode(line)); });
+  $('comments-list').replaceChildren(message);
 }
 
 async function loadComments(append = false) {
@@ -134,13 +136,13 @@ export async function initCommunity() {
       body.value = ''; $('comment-length').textContent = '0';
       await loadComments(); feedback('足迹已留下。谢谢你来过。');
       if (!reduced) gsap.from('.comment-row:first-child', { opacity: 0, y: 12, duration: .5 });
-    } catch (error) { feedback(error instanceof Error ? error.message : '留言未发出，请重试。', true); }
+    } catch (error) { feedback(userError(error, '留言未发出，请重试。'), true); }
     finally { submitting = false; submit.disabled = !body.value.trim(); }
   });
-  $('refresh-comments').addEventListener('click', () => void loadComments().catch(error => feedback(error.message, true)));
+  $('refresh-comments').addEventListener('click', () => void loadComments().catch(error => feedback(userError(error), true)));
   $('more-comments').addEventListener('click', async () => {
     const button = $<HTMLButtonElement>('more-comments'); button.disabled = true;
-    try { await loadComments(true); } catch (error) { feedback((error as Error).message, true); }
+    try { await loadComments(true); } catch (error) { feedback(userError(error), true); }
     finally { button.disabled = false; }
   });
   try {

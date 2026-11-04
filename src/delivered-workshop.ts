@@ -3,7 +3,7 @@ import './delivered-workshop.css';
 
 type Mode = 'browse' | 'inspect' | 'play';
 type Section = 'arrival' | 'courtyard' | 'worlds';
-type Game = { id: string; title: string; description: string; cover: string; availability: string };
+type Game = { id: string; title: string | { zh: string; en: string }; description: string | { zh: string; en: string }; cover: string; availability: string };
 type World = {
   ready: Promise<void>;
   setMode(mode: Mode): void;

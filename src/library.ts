@@ -1,5 +1,13 @@
 import { HAS_SERVICE } from './service';
 import { request } from './community';
+import { currentLanguage, localize } from './i18n';
+
+const names: Record<string, { zh: string; en: string }> = {
+  'mystic-forest': { zh: '魔法森林', en: 'Mystic Forest' },
+  'neon-embers': { zh: '霓虹余烬', en: 'Neon Embers' },
+};
+const gameTags: Record<string, string[]> = { 'mystic-forest': ['肉鸽', '魔法', '无限模式'], 'neon-embers': ['多武器', '赛博朋克', '剧情'] };
+const gameName = (game: Game) => names[game.id]?.[currentLanguage()] || game.title;
 
 type Game = { id: string; title: string; description: string; image?: string; image_label?: string; images?: { url: string; label: string }[];
   video?: string; download_url?: string; likes?: number; liked?: boolean; showcase?: boolean };
@@ -26,7 +34,9 @@ export function selectGameById(id: string) {
 }
 function publishGames() {
   window.dispatchEvent(new CustomEvent('chasheo:games', { detail: games.map(g => ({
-    id: g.id, title: g.title, description: g.description,
+    id: g.id, title: names[g.id] || g.title,
+    description: { zh: localize(g.description, 'zh'), en: localize(g.description, 'en') },
+    tags: (gameTags[g.id] || []).map(tag => ({ zh: tag, en: localize(tag, 'en') })),
     cover: new URL(g.image || g.images?.[0]?.url || fallback.image!, location.origin).href,
     availability: g.showcase ? 'showcase' : 'playable'
   })) }));
@@ -34,10 +44,10 @@ function publishGames() {
 
 function updateStage(game: Game) {
   const title = document.getElementById('stage-game-title')!;
-  title.textContent = game.title.toUpperCase();
+  title.textContent = gameName(game);
   const image = document.getElementById('stage-poster') as HTMLImageElement;
   image.src = game.image || game.images?.[0]?.url || fallback.image!;
-  image.alt = `${game.title} 游戏视觉`;
+  image.alt = `${gameName(game)} · ${localize('游戏视觉')}`;
   const disclosure = document.querySelector<HTMLElement>('.poster-disclosure');
   if (disclosure) disclosure.textContent = game.id === 'neon-embers'
     ? '游戏截图 / 入场后切换为实机画面' : '概念视觉 / 入场后切换为实机画面';
@@ -45,20 +55,18 @@ function updateStage(game: Game) {
 
 function render() {
   library.replaceChildren();
-  games.forEach((game, index) => {
+  games.forEach(game => {
     const card = document.createElement('article');
     card.className = 'game-card' + (game.id === chosen ? ' selected' : '');
     const visual = document.createElement('div'); visual.className = 'game-card-visual';
     const img = document.createElement('img'); img.loading = 'lazy';
-    img.src = game.image || game.images?.[0]?.url || fallback.image!; img.alt = `${game.title} 游戏视觉`;
-    const badge = document.createElement('span'); badge.className = 'game-card-badge';
-    badge.textContent = `WORLD ${String(index + 1).padStart(2, '0')} / ${game.id === chosen ? 'SELECTED' : 'EXPLORE'}`;
+    img.src = game.image || game.images?.[0]?.url || fallback.image!; img.alt = `${gameName(game)} · ${localize('游戏视觉')}`;
     const caption = document.createElement('span'); caption.className = 'game-card-caption';
-    caption.textContent = game.image_label || '游戏视觉';
-    visual.append(img, badge, caption);
+    caption.textContent = localize(game.image_label || '游戏视觉');
+    visual.append(img, caption);
     const content = document.createElement('div'); content.className = 'game-card-content';
-    const title = document.createElement('h4'); title.textContent = game.title;
-    const description = document.createElement('p'); description.textContent = game.description;
+    const title = document.createElement('h4'); title.textContent = gameName(game);
+    const description = document.createElement('p'); description.textContent = localize(game.description);
     const actions = document.createElement('div'); actions.className = 'game-card-actions';
     const choose = document.createElement('button'); choose.className = 'game-select';
     choose.textContent = game.showcase ? '推流接入中' : game.id === chosen ? '已选择 ✓' : '选择这个世界 ↗';
@@ -67,7 +75,7 @@ function render() {
     const like = document.createElement('button'); like.className = 'game-like';
     like.disabled = !HAS_SERVICE || typeof game.likes !== 'number';
     like.textContent = `${game.liked ? '♥' : '♡'} ${typeof game.likes === 'number' ? game.likes : '—'}`;
-    like.setAttribute('aria-label', game.liked ? `取消点赞 ${game.title}` : `点赞 ${game.title}`);
+    like.setAttribute('aria-label', `${currentLanguage() === 'en' ? (game.liked ? 'Unlike' : 'Like') : (game.liked ? '取消点赞' : '点赞')} ${gameName(game)}`);
     like.setAttribute('aria-pressed', String(Boolean(game.liked)));
     like.addEventListener('click', async () => {
       like.disabled = true; feedback.textContent = '';
@@ -81,16 +89,23 @@ function render() {
       download.href = game.download_url; download.target = '_blank'; download.rel = 'noopener noreferrer';
     }
     actions.append(choose, like, download);
-    content.append(title, description, actions);
+    content.append(title, description);
+    if (gameTags[game.id]) {
+      const tags = document.createElement('ul'); tags.className = 'game-tags';
+      tags.setAttribute('aria-label', currentLanguage() === 'en' ? 'Game tags' : '游戏标签');
+      gameTags[game.id].forEach(tag => { const item = document.createElement('li'); item.textContent = localize(tag); tags.append(item); });
+      content.append(tags);
+    }
+    content.append(actions);
     const images = [...(game.image ? [{ url: game.image, label: game.image_label || '游戏视觉' }] : []), ...(game.images || [])]
       .filter((item, i, all) => all.findIndex(other => other.url === item.url) === i);
     if (images.length > 1) {
       const media = document.createElement('div'); media.className = 'game-media';
       images.forEach((item, i) => {
-        const thumb = document.createElement('button'); thumb.setAttribute('aria-label', `查看第 ${i + 1} 张图片：${item.label}`);
+        const thumb = document.createElement('button'); thumb.setAttribute('aria-label', currentLanguage() === 'en' ? `View image ${i + 1}: ${localize(item.label)}` : `查看第 ${i + 1} 张图片：${localize(item.label)}`);
         const picture = document.createElement('img'); picture.src = item.url; picture.alt = ''; picture.loading = 'lazy';
         thumb.append(picture); thumb.addEventListener('click', () => {
-          img.src = item.url; img.alt = item.label; caption.textContent = item.label;
+          img.src = item.url; img.alt = localize(item.label); caption.textContent = localize(item.label);
           img.classList.toggle('browser-capture', item.url.endsWith('/mystic-forest-browser.png'));
         }); media.append(thumb);
       });
@@ -99,7 +114,7 @@ function render() {
     if (game.video) {
       const video = document.createElement('video'); video.controls = true; video.preload = 'none';
       video.src = game.video; video.className = 'game-preview-video';
-      video.setAttribute('aria-label', `${game.title} 游戏预告`); content.append(video);
+      video.setAttribute('aria-label', `${gameName(game)} · ${currentLanguage() === 'en' ? 'Trailer' : '游戏预告'}`); content.append(video);
     }
     card.append(visual, content); library.append(card);
   });
@@ -115,6 +130,8 @@ export function setLibrarySession(active: boolean, gameId?: string) {
 }
 
 export async function initLibrary() {
+  window.addEventListener('chasheo:language', () => { render(); const game = games.find(g => g.id === chosen); if (game) updateStage(game); });
+  updateStage(games[0]);
   render(); publishGames();
   if (!HAS_SERVICE) { feedback.textContent = '世界服务离线，暂时展示本地预览。'; return; }
   try {

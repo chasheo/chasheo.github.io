@@ -5,7 +5,7 @@ import { initCommunity, updateStats } from './community';
 import { HAS_SERVICE, apiUrl, streamUrl, selectService } from './service';
 import { initLibrary, selectedGame, setLibrarySession } from './library';
 
-import { initI18n } from './i18n';
+import { initI18n, userError } from './i18n';
 import { initDeliveredWorkshop } from './delivered-workshop';
 initI18n();
 
@@ -68,30 +68,30 @@ function render() {
   el('sound').hidden = !hasFrames;
   el('pointer').hidden = !hasFrames;
   if (s?.state === 'waiting') {
-    el('number-label').textContent = 'YOUR QUEUE POSITION';
+    el('number-label').textContent = '你的排队位置';
     el('queue-number').textContent = String(s.position).padStart(2, '0');
     el('queue-detail').textContent = '轮到你时会在这里提醒';
     el('session-message').textContent = lastError || '请保留此页面，我们正在为你等候席位。';
     button('正在排队', true);
   } else if (s?.state === 'offered') {
-    el('number-label').textContent = 'YOUR SEAT IS READY';
+    el('number-label').textContent = '席位已就绪';
     el('queue-number').textContent = '01';
     el('queue-detail').textContent = `请在 ${s.offer_remaining} 秒内确认入场`;
     el('session-message').textContent = lastError || '轮到你了。选择世界后确认启动。';
     button('启动所选游戏');
   } else if (active) {
-    el('number-label').textContent = 'YOUR EXPLORATION';
+    el('number-label').textContent = '本次游玩';
     el('queue-number').textContent = '01';
     el('queue-detail').textContent = s.state === 'starting' ? '世界正在启动' : '席位由你独享';
     el('session-message').textContent = lastError || (s.state === 'starting' ? '正在唤醒世界与连接画面，请稍候。' : hasFrames ? '画面已连接。点击画面，开始探索。' : '正在连接实时画面。');
     button(s.state === 'starting' ? '正在启动世界' : hasFrames ? '沉浸游玩' : '正在连接画面', !hasFrames);
   } else {
-    el('number-label').textContent = 'AVAILABLE SEATS';
+    el('number-label').textContent = '空闲席位';
     el('session-message').textContent = lastError || s?.reason || '准备好开启一小段探索了吗？';
     button(online ? '领取入场券' : '重新连接服务');
   }
   el('stage-message').textContent = active ? (hasFrames ? '' : s?.state === 'starting' ? '正在唤醒世界，请稍候…' : '正在建立实时连接…') : '选择世界，等你入场。';
-  el('live-label').textContent = hasFrames ? 'LIVE / YOUR WORLD' : active ? 'ESTABLISHING CONNECTION' : 'WAITING FOR EXPLORER';
+  el('live-label').textContent = hasFrames ? '正在游玩' : active ? '正在建立连接' : '等待入场';
 }
 
 function disconnect() {
@@ -143,7 +143,7 @@ async function connectStream() {
         lastError = '';
         stage.classList.add('live');
         setPlaying(true);
-        el('video-info').textContent = `${video.videoWidth} × ${video.videoHeight} · LIVE`;
+        el('video-info').textContent = `${video.videoWidth} × ${video.videoHeight} · 实机画面`;
         el('play-video').hidden = true;
         render();
         recordPlay();
@@ -156,7 +156,7 @@ async function connectStream() {
     render();
   } catch (error) {
     disconnect();
-    lastError = error instanceof Error ? error.message : '画面连接失败，请重试。';
+    lastError = userError(error, '画面连接失败，请重试。');
     render();
   }
 }
@@ -191,7 +191,7 @@ async function poll(heartbeat = false) {
     online = false;
     el('seat-state').textContent = '世界暂时离线，请稍后重试';
     el('seat-dot').className = 'status-dot offline';
-    lastError = error instanceof Error ? error.message : '连接失败，请重试。';
+    lastError = userError(error, '连接失败，请重试。');
     render();
   } finally {
     pollPending = false;
@@ -212,13 +212,13 @@ primary.addEventListener('click', async () => {
       sessionStorage.setItem('chasheo-session', token);
       current = result;
     }
-  } catch (error) { lastError = error instanceof Error ? error.message : '暂时无法入场。'; }
+  } catch (error) { lastError = userError(error, '暂时无法入场。'); }
   finally { busy = false; render(); await poll(); }
 });
 el('leave').addEventListener('click', async () => {
   busy = true;
   try { current = await api('leave'); disconnect(); lastError = ''; }
-  catch (error) { lastError = error instanceof Error ? error.message : '退出失败，请重试。'; }
+  catch (error) { lastError = userError(error, '退出失败，请重试。'); }
   finally { busy = false; render(); await poll(); }
 });
 el('reconnect').addEventListener('click', () => { disconnect(); lastError = ''; void connectStream(); });
@@ -315,7 +315,7 @@ if (HAS_SERVICE) {
 } else {
   el('seat-state').textContent = '游戏服务尚未接入';
   el('seat-dot').className = 'status-dot offline';
-  el('number-label').textContent = 'WORLD PREVIEW';
+  el('number-label').textContent = '世界预览';
   el('queue-number').textContent = '—';
   el('queue-detail').textContent = '实机体验稍后开放';
   el('session-message').textContent = '当前可以浏览世界。游戏服务接入后，即可在这里排队入场。';

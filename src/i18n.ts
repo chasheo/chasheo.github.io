@@ -1,4 +1,37 @@
 const translations: Record<string, string> = {
+  '魔法森林':'Mystic Forest','霓虹余烬':'Neon Embers',
+  '肉鸽':'Roguelite','魔法':'Magic','无限模式':'Endless mode','多武器':'Multiple weapons','赛博朋克':'Cyberpunk','剧情':'Story',
+  '更多世界。':'More worlds.','更多可能。':'More possibilities.',
+  '世界实验室':'World laboratory','世界仍在构建。':'The world is still being built.',
+  '游戏体验':'Playable worlds','人工智能 · 智能体 · 游戏 · 未来':'AI · AGENTS · GAMES · THE NEXT THING',
+  '在浏览器里，进入真正运行的虚幻引擎游戏。':'Enter a live Unreal Engine game in your browser.',
+  '入场确认已过期，请重新排队。':'Your offer expired. Please join the queue again.',
+  '游戏启动超时，请重新排队。':'The game took too long to start. Please queue again.',
+  '游戏已退出，席位已释放。':'The game exited and the seat has been released.',
+  '排队或入场确认超时，请重新加入。':'Your queue or admission offer expired. Please join again.',
+  '连接已失去心跳 2 分钟，席位已释放。':'No heartbeat for 2 minutes. Your seat has been released.',
+  '服务已停止。':'The service has stopped.',
+  '全栈开发工程师，任职于':'Full-stack engineer at','南方科技大学计算机系 · 2026 届':'SUSTech CS · Class of 2026',
+  '返回顶部':'Back to top','访问 GitHub':'Visit GitHub','在 GitHub 查看':'View on GitHub',
+  '01 / 访问':'01 / VISITS','02 / 游玩':'02 / EXPLORATIONS','03 / 留言':'03 / FOOTPRINTS',
+  '可游玩的世界':'Playable worlds','游戏库':'Game library','写一条留言':'Leave a message','持续更新':'And counting',
+  '一席一人':'One seat, one player','游玩说明':'Before you play','操作':'Controls',
+  '虚幻引擎游戏':'Unreal Engine game','你的排队位置':'YOUR QUEUE POSITION','席位已就绪':'YOUR SEAT IS READY',
+  '本次游玩':'YOUR EXPLORATION','空闲席位':'AVAILABLE SEATS','世界预览':'WORLD PREVIEW',
+  '等待访客':'AWAITING EXPLORER','正在建立连接':'ESTABLISHING CONNECTION','正在游玩':'LIVE / YOUR WORLD',
+  '等待入场':'WAITING FOR EXPLORER','实验 001':'EXPERIMENT 001','实机画面':'LIVE',
+  '世界概念视觉':'World concept art','游戏视觉':'Game artwork','游戏城市画面':'City screenshot','游戏主菜单':'Game menu',
+  '实机画面 · 浏览器截图':'Gameplay · browser capture','实机画面 · 街区交火':'Gameplay · street firefight','实机画面 · 螳刀战斗':'Gameplay · blade combat',
+  '网络连接失败，请稍后重试。':'Connection failed. Please try again later.',
+  '连接超时，请重试。':'Connection timed out. Please try again.',
+  '你已退出本次体验。':'You have left this session.',
+  '游戏网页沉浸模式':'Immersive game view','已进入网页沉浸模式，按 Esc 或点击「退出」返回。':'Immersive view enabled. Press Esc or select Exit to return.',
+  '当前可以浏览世界。游戏服务接入后，即可在这里排队入场。':'Browse the worlds now. Queueing opens when the game service is connected.',
+  '漫步新港城的雨夜街区，在霓虹与暗巷之间探索、战斗，追寻第一单。':'Explore rain-soaked New Harbor City, fight through neon-lit alleys and follow your first job.',
+  '一位旅人':'A traveler','主导航':'Main navigation','网站真实统计':'Live site statistics',
+  'chasheo 首页':'chasheo home','游戏画面，点击后控制角色':'Game view. Click to control your character.',
+  '雾气中的森林石环概念视觉':'Concept art of a forest stone gate','访问 chasheo 的 GitHub':'Visit chasheo on GitHub',
+  '会话已结束，请重新排队。':'Session ended. Please join the queue again.',
   '世界工坊':'World Workshop','由你唤醒':'AWAKEN IT',
   '接管女侠，走进一场属于你的试炼。':'Take control of the wanderer. Make this trial your own.',
   '你好，我是 chasheo。这里的世界，等待你的参与。':'Hi, I’m chasheo. These worlds are waiting for you.',
@@ -81,6 +114,21 @@ const translations: Record<string, string> = {
   '实机体验将在游戏服务接入后开放。':'The playable game will open when the service is available.',
 };
 
+export const currentLanguage = () => document.documentElement.lang.startsWith('en') ? 'en' : 'zh';
+const reverseText = new Map(Object.entries(translations).map(([zh, en]) => [en, zh]));
+export function localize(value: string, language = currentLanguage()): string {
+  const source = reverseText.get(value) || value;
+  return language === 'en' ? translations[source] || source : source;
+}
+export function userError(error: unknown, fallback = '请求失败，请稍后重试。'): string {
+  if (error instanceof Error) {
+    if (['AbortError', 'TimeoutError'].includes(error.name)) return '连接超时，请重试。';
+    if (error instanceof TypeError || /failed to fetch|networkerror|load failed|network request failed/i.test(error.message)) return '网络连接失败，请稍后重试。';
+    return error.message || fallback;
+  }
+  return fallback;
+}
+
 export function initI18n() {
   const header = document.querySelector<HTMLElement>('.masthead')!;
   const control = document.createElement('button');
@@ -95,10 +143,16 @@ export function initI18n() {
     if (match) return 'Please confirm within ' + match[1] + ' seconds';
     match = source.match(/^(\d+) 位访客正在等候$/);
     if (match) return match[1] + ' visitors waiting';
+    match = source.match(/^游戏 (\d+) · (已选择|可探索)$/);
+    if (match) return `WORLD ${match[1]} / ${match[2] === '已选择' ? 'SELECTED' : 'EXPLORE'}`;
+    match = source.match(/^WORLD (\d+) \/ (SELECTED|EXPLORE)$/);
+    if (match) return source;
+    match = source.match(/^(\d+) × (\d+) · 实机画面$/);
+    if (match) return `${match[1]} × ${match[2]} · LIVE`;
     return undefined;
   }
   function translate(node: Text) {
-    if (node.parentElement?.closest('#comments-list, textarea, input, script, style')) return;
+    if (node.parentElement?.closest('.comment-meta strong, .comment-content > p, .comment-avatar, .ww-root, .language-toggle, textarea, input, script, style')) return;
     const text = node.data;
     const trimmed = text.trim();
     const suffix = trimmed.match(/\s*[↗↙↻×✓↓↑]+$/)?.[0] || '';
@@ -127,6 +181,15 @@ export function initI18n() {
     if (name) name.placeholder = language === 'zh' ? '怎么称呼你？' : 'Your name';
     if (message) message.placeholder = language === 'zh' ? '留下你的想法' : 'Leave a message';
     walk(document.body);
+    document.title = language === 'zh' ? 'chasheo — 世界工坊' : 'chasheo — World Workshop';
+    document.querySelectorAll<HTMLElement>('[aria-label], img[alt]').forEach(element => {
+      if (element.closest('.ww-root')) return;
+      for (const attr of ['aria-label', 'alt']) {
+        const value = element.getAttribute(attr);
+        if (value) element.setAttribute(attr, localize(value, language));
+      }
+    });
+    window.dispatchEvent(new CustomEvent('chasheo:language'));
   }
   control.addEventListener('click', () => { language = language === 'zh' ? 'en' : 'zh'; localStorage.setItem('chasheo-language', language); apply(); });
   const observer = new MutationObserver(records => records.forEach(record => {
