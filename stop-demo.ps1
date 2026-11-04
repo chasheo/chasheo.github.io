@@ -1,6 +1,6 @@
 param([string]$ConfigPath = (Join-Path $PSScriptRoot '.local.json'))
 $ErrorActionPreference = 'Stop'
-$config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
+$config = Get-Content -LiteralPath $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $receipt = Join-Path $config.runtime_dir 'service.json'
 if (-not (Test-Path -LiteralPath $receipt)) { throw 'No service receipt. Do not stop unrelated Python processes.' }
 $owned = Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json

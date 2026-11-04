@@ -1,14 +1,15 @@
 param(
     [switch]$Remove,
     [string]$ConfigPath = (Join-Path $PSScriptRoot '.local.json'),
-    [string]$PythonPath = 'C:\SeeleAI\seele-dev\temp\chasheo-demo\venv\Scripts\python.exe'
+    [string]$PythonPath = ''
 )
 $ErrorActionPreference = 'Stop'
 $taskName = 'chasheo-worlds-local-host'
 $launcher = Join-Path $PSScriptRoot 'start-demo.ps1'
+$hiddenLauncher = Join-Path $PSScriptRoot 'start-demo-hidden.vbs'
 $existing = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 if ($existing) {
-    if (-not (@($existing.Actions | Where-Object { $_.Arguments -is [string] -and $_.Arguments.Contains($launcher) }).Count)) {
+    if (-not (@($existing.Actions | Where-Object { $_.Arguments -is [string] -and ($_.Arguments.Contains($launcher) -or $_.Arguments.Contains($hiddenLauncher)) }).Count)) {
         throw 'A task with this name belongs to another launcher. It has not been changed.'
     }
 }
@@ -18,17 +19,20 @@ if ($Remove) {
     exit 0
 }
 $configFile = (Resolve-Path -LiteralPath $ConfigPath).ProviderPath
+if (-not $PythonPath) {
+    $PythonPath = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
+    if (-not (Test-Path -LiteralPath $PythonPath)) {
+        $PythonPath = Join-Path (Split-Path $PSScriptRoot -Parent) 'seele-dev\temp\chasheo-demo\venv\Scripts\python.exe'
+    }
+}
 $pythonFile = (Resolve-Path -LiteralPath $PythonPath).ProviderPath
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-$shell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
-$arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -File "{0}" -ConfigPath "{1}" -PythonPath "{2}"' -f $launcher, $configFile, $pythonFile
+$shell = Join-Path $env:SystemRoot 'System32\wscript.exe'
+$arguments = '"{0}" "{1}" "{2}"' -f $hiddenLauncher, $configFile, $pythonFile
 $action = New-ScheduledTaskAction -Execute $shell -Argument $arguments -WorkingDirectory $PSScriptRoot
 $login = New-ScheduledTaskTrigger -AtLogOn -User $identity
-# Reconcile a crashed host while this user is logged in. start-demo.ps1 checks PID ownership;
-# the server also holds a Windows file lock and owns game processes with a Job Object.
-$reconcile = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1)
 $principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType Interactive -RunLevel Limited
 $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 2)
-Register-ScheduledTask -TaskName $taskName -Action $action -Trigger @($login, $reconcile) -Principal $principal -Settings $settings -Description 'Start and recover the single-seat local game host while its owner is logged in; no credentials are stored.' -Force | Out-Null
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $login -Principal $principal -Settings $settings -Description 'Silently start the single-seat local game host at user login; no credentials are stored.' -Force | Out-Null
 Start-ScheduledTask -TaskName $taskName
-Write-Output 'Local host login startup and one-minute recovery installed. Cloudflared remains a separate Windows service.'
+Write-Output 'Silent local host login startup installed. Cloudflared remains a separate Windows service.'

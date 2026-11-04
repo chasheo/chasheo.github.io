@@ -1,10 +1,16 @@
 param(
     [string]$ConfigPath = (Join-Path $PSScriptRoot '.local.json'),
-    [string]$PythonPath = 'C:\SeeleAI\seele-dev\temp\chasheo-demo\venv\Scripts\python.exe'
+    [string]$PythonPath = ''
 )
 $ErrorActionPreference = 'Stop'
+if (-not $PythonPath) {
+    $PythonPath = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
+    if (-not (Test-Path -LiteralPath $PythonPath)) {
+        $PythonPath = Join-Path (Split-Path $PSScriptRoot -Parent) 'seele-dev\temp\chasheo-demo\venv\Scripts\python.exe'
+    }
+}
 $configFile = (Resolve-Path -LiteralPath $ConfigPath).ProviderPath
-$config = Get-Content -LiteralPath $configFile -Raw | ConvertFrom-Json
+$config = Get-Content -LiteralPath $configFile -Raw -Encoding UTF8 | ConvertFrom-Json
 if (-not (Test-Path -LiteralPath $PythonPath)) { throw 'Demo Python environment is missing. Follow README.md setup.' }
 if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'dist\index.html'))) { throw 'Build the website first: npm run build' }
 New-Item -ItemType Directory -Path $config.runtime_dir -Force | Out-Null
