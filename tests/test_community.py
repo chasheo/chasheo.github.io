@@ -154,6 +154,8 @@ def test_github_pages_cors_and_comment_ownership_without_cookies(tmp_path, monke
     (tmp_path / 'dist' / 'draco').mkdir()
     decoder = b'\x00asm\x01\x00\x00\x00'
     (tmp_path / 'dist' / 'draco' / 'draco_decoder.wasm').write_bytes(decoder)
+    (tmp_path / 'dist' / 'world-workshop' / 'lib').mkdir(parents=True)
+    (tmp_path / 'dist' / 'world-workshop' / 'lib' / 'world-workshop.js').write_text('export {}', encoding='utf-8')
     monkeypatch.setattr(gateway, 'ROOT', tmp_path)
 
     async def check():
@@ -168,6 +170,9 @@ def test_github_pages_cors_and_comment_ownership_without_cookies(tmp_path, monke
             assert decoder_response.content_type == 'application/wasm'
             assert await decoder_response.read() == decoder
             assert (await client.get('/draco/')).status == 403
+            module = await client.get('/world-workshop/lib/world-workshop.js')
+            assert module.status == 200 and await module.text() == 'export {}'
+            assert (await client.get('/world-workshop/')).status == 403
             origin = {'Origin': 'https://chasheo.github.io'}
             preflight = await client.options('/api/comments', headers={**origin,
                 'Access-Control-Request-Method': 'POST',
