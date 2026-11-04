@@ -2,10 +2,16 @@ import { HAS_SERVICE } from './service';
 import { request } from './community';
 
 type Game = { id: string; title: string; description: string; image?: string; image_label?: string; images?: { url: string; label: string }[];
-  video?: string; download_url?: string; likes?: number; liked?: boolean };
+  video?: string; download_url?: string; likes?: number; liked?: boolean; showcase?: boolean };
 const fallback: Game = { id: 'mystic-forest', title: 'Mystic Forest',
   description: '在雾气与光之间，探索森林中的未知。', image: '/media/forest-portal.png' };
-let games: Game[] = [fallback];
+const neonPreview: Game = { id: 'neon-embers', title: '霓虹余烬 · Neon Embers',
+  description: '漫步新港城的雨夜街区，在霓虹与暗巷之间探索、战斗，追寻第一单。',
+  image: '/media/neon-embers-cover.webp', image_label: '游戏城市画面', showcase: true,
+  images: [{ url: '/media/neon-embers-menu.webp', label: '游戏主菜单' },
+    { url: '/media/neon-embers-firefight.webp', label: '实机画面 · 街区交火' },
+    { url: '/media/neon-embers-blades.webp', label: '实机画面 · 螳刀战斗' }] };
+let games: Game[] = [fallback, neonPreview];
 let chosen = fallback.id;
 let locked = false;
 let activeGameId = '';
@@ -15,14 +21,14 @@ const feedback = document.getElementById('library-feedback')!;
 export function selectedGame() { return chosen; }
 export function selectGameById(id: string) {
   const game = games.find(item => item.id === id);
-  if (!game || (locked && id !== chosen)) return false;
+  if (!game || game.showcase || (locked && id !== chosen)) return false;
   chosen = id; updateStage(game); render(); return true;
 }
 function publishGames() {
   window.dispatchEvent(new CustomEvent('chasheo:games', { detail: games.map(g => ({
     id: g.id, title: g.title, description: g.description,
     cover: new URL(g.image || g.images?.[0]?.url || fallback.image!, location.origin).href,
-    availability: 'playable'
+    availability: g.showcase ? 'showcase' : 'playable'
   })) }));
 }
 
@@ -47,13 +53,19 @@ function render() {
     const caption = document.createElement('span'); caption.className = 'game-card-caption';
     caption.textContent = game.image_label || '游戏视觉';
     visual.append(img, badge, caption);
+    let coverTitle: HTMLElement | undefined;
+    if (game.id === 'neon-embers') {
+      coverTitle = document.createElement('div'); coverTitle.className = 'neon-cover-title';
+      coverTitle.innerHTML = '<span>NEW HARBOR CITY</span><strong>霓虹余烬</strong><small>NEON EMBERS</small>';
+      visual.append(coverTitle);
+    }
     const content = document.createElement('div'); content.className = 'game-card-content';
     const title = document.createElement('h4'); title.textContent = game.title;
     const description = document.createElement('p'); description.textContent = game.description;
     const actions = document.createElement('div'); actions.className = 'game-card-actions';
     const choose = document.createElement('button'); choose.className = 'game-select';
-    choose.textContent = game.id === chosen ? '已选择 ✓' : '选择这个世界 ↗';
-    choose.disabled = locked; choose.setAttribute('aria-pressed', String(game.id === chosen));
+    choose.textContent = game.showcase ? '推流接入中' : game.id === chosen ? '已选择 ✓' : '选择这个世界 ↗';
+    choose.disabled = locked || Boolean(game.showcase); choose.setAttribute('aria-pressed', String(game.id === chosen));
     choose.addEventListener('click', () => { chosen = game.id; updateStage(game); render(); });
     const like = document.createElement('button'); like.className = 'game-like';
     like.disabled = !HAS_SERVICE || typeof game.likes !== 'number';
@@ -82,6 +94,7 @@ function render() {
         const picture = document.createElement('img'); picture.src = item.url; picture.alt = ''; picture.loading = 'lazy';
         thumb.append(picture); thumb.addEventListener('click', () => {
           img.src = item.url; img.alt = item.label; caption.textContent = item.label;
+          if (coverTitle) coverTitle.hidden = item.url !== game.image;
           img.classList.toggle('browser-capture', item.url.endsWith('/mystic-forest-browser.png'));
         }); media.append(thumb);
       });
@@ -111,7 +124,7 @@ export async function initLibrary() {
   try {
     const result = await request('games') as { games: Game[] };
     if (!Array.isArray(result.games) || !result.games.length) throw new Error('empty');
-    games = result.games;
+    games = result.games.some(g => g.id === neonPreview.id) ? result.games : [...result.games, neonPreview];
     if (activeGameId && games.some(g => g.id === activeGameId)) chosen = activeGameId;
     if (!games.some(g => g.id === chosen)) chosen = games[0].id;
     updateStage(games.find(g => g.id === chosen)!); render(); publishGames();
